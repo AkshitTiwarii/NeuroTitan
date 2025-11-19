@@ -66,11 +66,11 @@ const HeroSection = () => {
             height='100%'
             style={{ 
               border: 'none',
-              pointerEvents: isMobile ? 'none' : 'auto',
+              pointerEvents: 'auto',
               display: 'block',
               position: 'relative',
               overflow: 'hidden',
-              touchAction: 'none',
+              touchAction: 'pan-y',
               transform: 'translate3d(0, 0, 0)',
               WebkitTransform: 'translate3d(0, 0, 0)',
               backfaceVisibility: 'hidden',
@@ -96,17 +96,17 @@ const HeroSection = () => {
             willChange: 'opacity'
           }} />
           
-          {/* Click blocker to prevent LinkedIn redirect - expanded on mobile */}
+          {/* Click blocker to prevent LinkedIn redirect */}
           <div style={{
             position: 'absolute',
             bottom: '0',
             left: '0',
             width: '100%',
-            height: isMobile ? '100%' : '50%',
+            height: '60%',
             zIndex: 99,
-            pointerEvents: isMobile ? 'none' : 'auto',
+            pointerEvents: 'auto',
             cursor: 'default',
-            touchAction: 'none',
+            touchAction: 'pan-y',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden'
           }} />
