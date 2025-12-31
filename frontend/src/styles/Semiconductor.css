@@ -1,0 +1,1242 @@
+/* ========================================
+   SEMICONDUCTOR PAGE - RF SPECTRUM DESIGN
+   Color Palette: Snapdragon + Qualcomm + NVIDIA + Ryzen
+   ======================================== */
+
+:root {
+  /* Silicon Red / Obsidian System */
+  --black-0: #050507;
+  --black-1: #0B0C10;
+  --graphite: #2A2A2E;
+  --red-core: #8B0000;
+  --red-active: #C1121F;
+  --red-hot: #FF2A2A;
+  --text-main: #E6E6EB;
+  --text-dim: #9A9AA2;
+}
+
+.semiconductor-container {
+  width: 100%;
+  min-height: 100vh;
+  background: linear-gradient(180deg, var(--black-0) 0%, var(--black-1) 50%, var(--black-0) 100%);
+  color: var(--text-main);
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  overflow-x: hidden;
+}
+
+/* ========================================
+   SECTIONS
+   ======================================== */
+
+.semiconductor-section {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 80px 40px;
+  position: relative;
+}
+
+.section-content {
+  max-width: 1200px;
+  width: 100%;
+  text-align: center;
+}
+
+/* ========================================
+   HERO SECTION
+   ======================================== */
+
+.hero-section {
+  height: 100vh;
+  display: grid;
+  place-items: center;
+  perspective: 1400px;
+  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.08) 0%, transparent 70%);
+  position: relative;
+  overflow: visible;
+}
+
+#chip-canvas {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+}
+
+.hero-title {
+  position: fixed;
+  top: 50vh;
+  left: 50vw;
+  transform: translate(-50%, -50%);
+  z-index: 999;
+  font-size: 64px;
+  font-weight: 800;
+  letter-spacing: 2px;
+  margin: 0;
+  line-height: 1.2;
+  text-align: center;
+  color: #FFFFFF;
+  display: inline-block;
+  text-shadow: 0 4px 30px rgba(0, 0, 0, 0.8);
+  pointer-events: none;
+  max-width: 90vw;
+}
+
+.hero-title span {
+  display: block;
+  font-size: 48px;
+  font-weight: 400;
+  letter-spacing: 8px;
+  color: #FF2A2A;
+  text-shadow: 0 2px 20px rgba(193, 18, 31, 0.6);
+  margin-top: 12px;
+}
+
+.hero-content {
+  position: relative;
+  width: 420px;
+  height: 420px;
+  transform-style: preserve-3d;
+}
+
+/* CHIP STACK */
+
+.chip-stack {
+  position: absolute;
+  inset: 0;
+  transform-style: preserve-3d;
+}
+
+.chip-layer {
+  position: absolute;
+  inset: 60px;
+  background: linear-gradient(180deg, #0f1016 0%, #050507 100%);
+  border: 1px solid rgba(193, 18, 31, 0.15);
+  transform-style: preserve-3d;
+  opacity: 0;
+}
+
+/* Thickness illusion */
+.chip-layer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateZ(-10px);
+  background: #040406;
+  filter: brightness(0.6);
+}
+
+.chip-core {
+  position: absolute;
+  inset: 140px;
+  background: radial-gradient(circle, var(--red-active), var(--red-core));
+  transform: translateZ(12px);
+  box-shadow: 0 0 0 rgba(193, 18, 31, 0);
+  opacity: 0;
+}
+
+/* CIRCUITS */
+
+.chip-svg {
+  position: absolute;
+  inset: 0;
+  mix-blend-mode: screen;
+  pointer-events: none;
+}
+
+.circuit-path {
+  fill: none;
+  stroke: rgba(42, 42, 46, 0.9);
+  stroke-width: 1.2;
+  stroke-dasharray: 240;
+  stroke-dashoffset: 240;
+  transition: none;
+}
+
+/* TEXT */
+
+.hero-title {
+  position: absolute;
+  bottom: -160px;
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0;
+  line-height: 1.1;
+  color: var(--text-main);
+}
+
+.hero-title span {
+  display: block;
+  font-size: 40px;
+  font-weight: 300;
+  letter-spacing: 6px;
+  color: var(--red-active);
+}
+
+.hero-subtitle {
+  font-size: 16px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin: 0;
+  font-family: 'Courier New', monospace;
+}
+
+.hero-specs {
+  display: flex;
+  gap: 60px;
+  margin-top: 40px;
+}
+
+.spec-item {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 20px;
+  border: 1px solid var(--graphite);
+  border-radius: 4px;
+  background: rgba(11, 12, 16, 0.6);
+  backdrop-filter: blur(10px);
+  min-width: 120px;
+}
+
+.spec-value {
+  font-size: 36px;
+  font-weight: 700;
+  color: var(--red-active);
+  font-family: 'Courier New', monospace;
+}
+
+.spec-label {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* ========================================
+   SECTION TITLES
+   ======================================== */
+
+.section-title {
+  font-size: 42px;
+  font-weight: 600;
+  letter-spacing: 2px;
+  margin: 0 0 60px 0;
+  color: var(--text-main);
+  position: relative;
+  display: inline-block;
+}
+
+.section-title::after {
+  content: '';
+  position: absolute;
+  bottom: -15px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 100px;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--red-active), transparent);
+}
+
+.section-description {
+  font-size: 18px;
+  line-height: 1.8;
+  color: #FFFFFF;
+  max-width: 800px;
+  margin: 40px auto 0;
+}
+
+/* ========================================
+   WAFER SECTION
+   ======================================== */
+
+.wafer-section {
+  background: radial-gradient(ellipse at center, rgba(139, 0, 0, 0.06) 0%, transparent 60%);
+}
+
+.wafer-visual {
+  width: 500px;
+  height: 500px;
+  margin: 0 auto;
+}
+
+.wafer-svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 0 20px rgba(139, 0, 0, 0.25));
+}
+
+/* ========================================
+   TRANSISTOR SECTION
+   ======================================== */
+
+.transistor-section {
+  background: linear-gradient(180deg, transparent 0%, rgba(193, 18, 31, 0.05) 50%, transparent 100%);
+}
+
+.transistor-visual {
+  width: 400px;
+  height: 300px;
+  margin: 0 auto 40px;
+  padding: 20px;
+  border: 1px solid var(--graphite);
+  border-radius: 8px;
+  background: rgba(11, 12, 16, 0.7);
+}
+
+.transistor-specs {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  max-width: 500px;
+  margin: 40px auto;
+  padding: 30px;
+  background: rgba(11, 12, 16, 0.6);
+  border: 1px solid var(--graphite);
+  border-radius: 8px;
+}
+
+.spec-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(193, 18, 31, 0.15);
+  font-family: 'Courier New', monospace;
+}
+
+.spec-row:last-child {
+  border-bottom: none;
+}
+
+.spec-name {
+  font-size: 14px;
+  color: #FFFFFF;
+  letter-spacing: 1px;
+}
+
+.spec-data {
+  font-size: 18px;
+  color: #FF2A2A;
+  font-weight: 700;
+}
+
+/* ========================================
+   LAYERS SECTION
+   ======================================== */
+
+.layers-section {
+  background: radial-gradient(ellipse at center, rgba(193, 18, 31, 0.06) 0%, transparent 70%);
+}
+
+.layers-visual {
+  display: flex;
+  flex-direction: column;
+  gap: 30px;
+  margin: 40px auto;
+  max-width: 700px;
+}
+
+.circuit-layer {
+  position: relative;
+  opacity: 0;
+  transform-style: preserve-3d;
+}
+
+.circuit-layer svg {
+  width: 100%;
+  height: auto;
+}
+
+.layer-label {
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  letter-spacing: 2px;
+  color: #FFFFFF;
+  font-family: 'Courier New', monospace;
+  font-weight: 700;
+}
+
+/* ========================================
+   DATA SECTION
+   ======================================== */
+
+.data-section {
+  background: linear-gradient(180deg, transparent 0%, rgba(139, 0, 0, 0.04) 50%, transparent 100%);
+}
+
+.spec-table {
+  max-width: 900px;
+  margin: 80px auto 0;
+  border-top: 1px solid rgba(193, 18, 31, 0.2);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.spec-row {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  padding: 22px 0;
+  border-bottom: 1px solid rgba(42, 42, 46, 0.6);
+  transition: border-color 0.3s ease;
+}
+
+.spec-row:hover {
+  border-color: rgba(193, 18, 31, 0.4);
+}
+
+.spec-key {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: rgba(154, 154, 162, 0.8);
+  font-weight: 500;
+}
+
+.spec-value {
+  font-size: 22px;
+  font-weight: 600;
+  color: rgba(230, 230, 235, 0.95);
+  text-align: right;
+}
+
+.spec-value em {
+  font-size: 12px;
+  margin-left: 4px;
+  color: rgba(154, 154, 162, 0.6);
+  font-style: normal;
+  letter-spacing: 1px;
+}
+
+/* ========================================
+   FOOTER SECTION
+   ======================================== */
+
+.footer-section {
+  min-height: 50vh;
+  background: linear-gradient(180deg, transparent 0%, var(--black-0) 100%);
+}
+
+.footer-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 30px;
+}
+
+.footer-line {
+  width: 200px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--red-core), transparent);
+}
+
+.footer-text {
+  font-size: 12px;
+  letter-spacing: 4px;
+  color: var(--text-dim);
+  margin: 0;
+  font-weight: 500;
+}
+
+.footer-coordinates {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-family: 'Courier New', monospace;
+}
+
+.coord-separator {
+  opacity: 0.4;
+}
+
+/* ========================================
+   RESPONSIVE
+   ======================================== */
+
+@media (max-width: 1024px) {
+  .hero-title {
+    font-size: 56px;
+  }
+  
+  .title-accent {
+    font-size: 36px;
+  }
+  
+  .data-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  
+  .chip-visual {
+    width: 300px;
+    height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .semiconductor-section {
+    padding: 60px 20px;
+  }
+  
+  .hero-title {
+    font-size: 42px;
+  }
+  
+  .title-accent {
+    font-size: 28px;
+  }
+  
+  .hero-specs {
+    flex-direction: column;
+    gap: 20px;
+  }
+  
+  .section-title {
+    font-size: 32px;
+  }
+  
+  .chip-visual,
+  .wafer-visual {
+    width: 100%;
+    max-width: 350px;
+    height: auto;
+  }
+  
+  .data-grid {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  
+  .layers-visual {
+    max-width: 100%;
+  }
+}
+
+/* ========================================
+   SECTION 0: PRELOAD / CALIBRATION
+   ======================================== */
+
+.preload-section {
+  width: 100%;
+  height: 100vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080c12;
+  overflow: hidden;
+}
+
+.preload-noise {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  background-image: 
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.02) 0px,
+      transparent 1px,
+      transparent 2px,
+      rgba(255, 255, 255, 0.02) 3px
+    );
+  pointer-events: none;
+}
+
+.preload-grid {
+  width: 60%;
+  height: 60%;
+  opacity: 0;
+  transform: scale(1.05);
+  filter: drop-shadow(0 0 20px rgba(120, 140, 180, 0.15));
+}
+
+/* ========================================
+   SECTION 1: WAFER ASSEMBLY
+   ======================================== */
+
+.wafer-assembly-section {
+  width: 100%;
+  height: 120vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #080c12 0%, #0a0e15 100%);
+}
+
+.wafer-container {
+  position: relative;
+  width: 600px;
+  height: 600px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.wafer-main {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  filter: drop-shadow(0 4px 24px rgba(100, 130, 180, 0.2));
+}
+
+.wafer-fragment {
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  opacity: 0;
+  left: 50%;
+  top: 50%;
+  margin-left: -40px;
+  margin-top: -40px;
+}
+
+.wafer-fragment svg {
+  width: 100%;
+  height: 100%;
+  filter: drop-shadow(0 2px 8px rgba(120, 140, 180, 0.3));
+}
+
+/* ========================================
+   SECTION 2: LAYER SEPARATION
+   ======================================== */
+
+.layer-separation-section {
+  width: 100%;
+  height: 150vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e15;
+  padding: 10vh 0;
+}
+
+.layers-container {
+  position: relative;
+  width: 90%;
+  max-width: 1200px;
+  height: 600px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+}
+
+.silicon-layer {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  transition: none;
+}
+
+.silicon-layer svg {
+  width: 100%;
+  height: auto;
+  filter: drop-shadow(0 4px 16px rgba(0, 0, 0, 0.4));
+}
+
+/* ========================================
+   SECTION 3: CIRCUIT EMERGENCE
+   ======================================== */
+
+.circuit-emergence-section {
+  width: 100%;
+  height: 180vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0c1018 0%, #080c12 100%);
+}
+
+.circuits-container {
+  position: relative;
+  width: 95%;
+  max-width: 1400px;
+  height: 80vh;
+}
+
+.circuit-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.9;
+}
+
+.circuit-layer svg {
+  width: 100%;
+  height: 100%;
+}
+
+.circuit-path {
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+
+.circuit-node {
+  transition: all 0.3s ease;
+}
+
+.circuit-node-complete {
+  filter: drop-shadow(0 0 2px rgba(160, 200, 240, 0.6));
+}
+
+/* ========================================
+   SECTION 4: SIGNAL FLOW
+   ======================================== */
+
+.signal-flow-section {
+  width: 100%;
+  height: 200vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(180deg, #080c12 0%, #0a0f16 50%, #080c12 100%);
+}
+
+.signal-container {
+  position: relative;
+  width: 90%;
+  max-width: 1400px;
+  height: 80vh;
+}
+
+.signal-path {
+  position: absolute;
+  width: 100%;
+  height: 40px;
+  left: 0;
+}
+
+.signal-path svg {
+  width: 100%;
+  height: 100%;
+}
+
+.signal-pulse {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  width: 30px;
+  height: 30px;
+  margin-top: -15px;
+  margin-left: -15px;
+  pointer-events: none;
+}
+
+.signal-pulse svg {
+  width: 100%;
+  height: 100%;
+}
+
+.signal-interconnect {
+  position: absolute;
+  top: 0;
+  height: 100%;
+  width: 4px;
+}
+
+.signal-interconnect svg {
+  width: 100%;
+  height: 100%;
+}
+
+.velocity-indicator {
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.indicator-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.indicator-bar {
+  width: 120px;
+  height: 4px;
+  background: rgba(80, 100, 130, 0.3);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.indicator-fill {
+  height: 100%;
+  width: 60%;
+  background: linear-gradient(90deg, 
+    rgba(139, 0, 0, 0.6) 0%, 
+    rgba(193, 18, 31, 0.9) 100%
+  );
+  box-shadow: 0 0 8px rgba(193, 18, 31, 0.6);
+}
+
+/* ========================================
+   SECTION 5: TRANSISTOR FOCUS
+   ======================================== */
+
+.transistor-focus-section {
+  width: 100%;
+  height: 140vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #080c12;
+  overflow: hidden;
+}
+
+.background-layers {
+  position: absolute;
+  inset: 0;
+  opacity: 0.4;
+  transition: all 0.8s ease;
+}
+
+.background-layers svg {
+  width: 100%;
+  height: 100%;
+}
+
+.transistor-container {
+  position: relative;
+  width: 400px;
+  height: 300px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transform-origin: center center;
+}
+
+.transistor-container svg {
+  width: 100%;
+  height: 100%;
+}
+
+.transistor-main {
+  transition: all 0.3s ease;
+}
+
+.annotations {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.annotation {
+  position: absolute;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  transform: translate(-50%, -50%);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.annotation-label {
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.annotation-value {
+  font-size: 12px;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+/* ========================================
+   SECTION 6: DATA / TYPOGRAPHY
+   ======================================== */
+
+.data-typography-section {
+  width: 100%;
+  height: 120vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: radial-gradient(ellipse at center, #0c1018 0%, #080c12 100%);
+}
+
+.data-container {
+  position: relative;
+  width: 95%;
+  max-width: 1400px;
+  height: 85vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.data-grid {
+  position: absolute;
+  inset: 0;
+  opacity: 0.5;
+}
+
+.data-grid svg {
+  width: 100%;
+  height: 100%;
+}
+
+.data-points-grid {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(2, 1fr);
+  gap: 40px;
+  padding: 80px;
+}
+
+.data-point {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  position: relative;
+}
+
+.data-point-indicator {
+  width: 40px;
+  height: 40px;
+}
+
+.data-point-label {
+  font-size: 10px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 600;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.data-point-value {
+  font-size: 28px;
+  color: var(--text-main);
+  font-weight: 700;
+  letter-spacing: -0.5px;
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+}
+
+.data-point-unit {
+  font-size: 11px;
+  color: var(--text-dim);
+  font-weight: 500;
+  letter-spacing: 0.5px;
+}
+
+.data-point-connection {
+  position: absolute;
+  bottom: -20px;
+  width: 80%;
+  opacity: 0.6;
+}
+
+.typography-content {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  text-align: center;
+  z-index: 10;
+}
+
+.typography-heading {
+  font-size: 64px;
+  font-weight: 700;
+  letter-spacing: -1px;
+  margin: 0 0 20px 0;
+  color: var(--text-main);
+  line-height: 1.1;
+  font-family: 'Inter', -apple-system, sans-serif;
+}
+
+.typography-subtext {
+  font-size: 20px;
+  font-weight: 500;
+  letter-spacing: 4px;
+  margin: 0 0 12px 0;
+  color: var(--text-dim);
+}
+
+.typography-description {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: 3px;
+  margin: 0;
+  color: var(--text-dim);
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.char {
+  display: inline-block;
+}
+
+.voltage-scale {
+  position: absolute;
+  left: 5%;
+  top: 10%;
+  height: 60%;
+  width: 40px;
+}
+
+.scale-line {
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: linear-gradient(180deg, 
+    rgba(42, 42, 46, 0.4) 0%, 
+    rgba(42, 42, 46, 0.2) 100%
+  );
+}
+
+.scale-mark {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.scale-mark::before {
+  content: '';
+  width: 8px;
+  height: 1px;
+  background: rgba(42, 42, 46, 0.5);
+}
+
+.scale-value {
+  font-size: 9px;
+  color: var(--text-dim);
+  font-family: 'Monaco', 'Courier New', monospace;
+  font-weight: 500;
+}
+
+.nanometer-reference {
+  position: absolute;
+  bottom: 10%;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+/* ========================================
+   SECTION 7: FUTURE / ABSTRACTION
+   ======================================== */
+
+.future-abstraction-section {
+  width: 100%;
+  min-height: 150vh;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #0a0e15;
+  transition: background-color 0.6s ease;
+}
+
+.abstraction-container {
+  position: relative;
+  width: 95%;
+  max-width: 1400px;
+  height: 80vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.geometry-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.8;
+}
+
+.points-layer {
+  position: absolute;
+  inset: 0;
+  opacity: 0.6;
+}
+
+.final-message {
+  position: absolute;
+  bottom: 15%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Monaco', 'Courier New', monospace;
+}
+
+.message-line {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.message-text {
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.message-divider {
+  width: 40px;
+  height: 1px;
+  background: rgba(42, 42, 46, 0.4);
+}
+
+.message-status {
+  font-size: 14px;
+  letter-spacing: 3px;
+  color: var(--text-main);
+  font-weight: 700;
+}
+
+.message-timestamp {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.message-coordinates {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-size: 10px;
+  letter-spacing: 1.5px;
+  color: var(--text-dim);
+}
+
+.coord-separator {
+  opacity: 0.4;
+}
+
+/* ========================================
+   SHARED: SECTION LABELS
+   ======================================== */
+
+.section-label {
+  position: absolute;
+  bottom: 8%;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  font-family: 'Monaco', 'Courier New', monospace;
+  opacity: 0.7;
+  padding: 12px 24px;
+  background: rgba(10, 14, 20, 0.6);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(100, 130, 170, 0.2);
+  border-radius: 2px;
+}
+
+.label-text {
+  font-size: 11px;
+  letter-spacing: 2px;
+  color: var(--text-dim);
+  font-weight: 600;
+}
+
+.label-divider {
+  width: 24px;
+  height: 1px;
+  background: rgba(42, 42, 46, 0.4);
+}
+
+.label-desc {
+  font-size: 10px;
+  letter-spacing: 2.5px;
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 1200px) {
+  .typography-heading {
+    font-size: 48px;
+  }
+  
+  .data-points-grid {
+    grid-template-columns: repeat(2, 1fr);
+    grid-template-rows: repeat(3, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .wafer-container {
+    width: 90vw;
+    height: 90vw;
+  }
+  
+  .typography-heading {
+    font-size: 36px;
+  }
+  
+  .typography-subtext {
+    font-size: 16px;
+  }
+  
+  .data-points-grid {
+    grid-template-columns: 1fr;
+    grid-template-rows: auto;
+    padding: 40px;
+  }
+  
+  .section-label {
+    flex-direction: column;
+    gap: 8px;
+    padding: 8px 16px;
+  }
+  
+  .label-divider {
+    width: 40px;
+  }
+}
+
+/* ========================================
+   PERFORMANCE OPTIMIZATIONS
+   ======================================== */
+
+.semiconductor-container svg {
+  shape-rendering: geometricPrecision;
+}
+
+.semiconductor-container * {
+  will-change: auto;
+}
+
+/* Reduced motion preference */
+@media (prefers-reduced-motion: reduce) {
+  .semiconductor-container * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
