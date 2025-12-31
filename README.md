@@ -1,4 +1,4 @@
-# NeuroTitan - Advanced AI Research Platform
+# NeuroTitan - Advanced AI Research Platform-
 
 Building the future of artificial intelligence through open research, collaborative innovation, and cutting-edge technology.
 
