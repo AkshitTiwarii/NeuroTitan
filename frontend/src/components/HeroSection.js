@@ -221,7 +221,7 @@ const HeroSection = () => {
               </span>
             </a>
             
-            <a href="#research" className="group w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-sm transition-all duration-200 active:scale-95 hover:border-opacity-40" style={{ 
+            <a href="/semiconductor" className="group w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-sm transition-all duration-200 active:scale-95 hover:border-opacity-40" style={{ 
               background: 'transparent', 
               color: '#FFFFFF', 
               border: '1px solid rgba(255, 255, 255, 0.2)', 
@@ -231,7 +231,7 @@ const HeroSection = () => {
               willChange: 'transform, border-color'
             }}>
               <span className="inline-flex items-center gap-2">
-                Research Lab
+                Semiconductor
                 <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                 </svg>
