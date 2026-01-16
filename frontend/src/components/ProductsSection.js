@@ -8,15 +8,30 @@ const ProductsSection = () => {
   const ref = useRef(null);
   const sectionRef = useRef(null);
   const isInView = useInView(ref, { once: true, margin: '-100px' });
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], [0, 1, 1, 0]);
+  const opacity = useTransform(scrollYProgress, [0, 0.2, 0.8, 1], isMobile ? [1, 1, 1, 1] : [0, 1, 1, 0]);
 
   const products = [
+    {
+      name: 'Echo',
+      description: 'AI-powered sentiment analysis platform leveraging NLP to understand human emotions through social media',
+      category: 'Research Project',
+      status: 'Live',
+      link: '/echo',
+    },
     {
       name: 'NeuroChat AI',
       description: 'Advanced conversational AI platform with multi-modal capabilities for next-gen customer experiences',
@@ -75,19 +90,19 @@ const ProductsSection = () => {
     visible: {
       opacity: 1,
       transition: {
-        staggerChildren: 0.12,
-        delayChildren: 0.2,
+        staggerChildren: isMobile ? 0.05 : 0.12,
+        delayChildren: isMobile ? 0.1 : 0.2,
       }
     }
   };
 
   const cardVariants = {
-    hidden: { opacity: 0, y: 50 },
+    hidden: { opacity: 0, y: isMobile ? 20 : 50 },
     visible: {
       opacity: 1,
       y: 0,
       transition: {
-        duration: 0.7,
+        duration: isMobile ? 0.3 : 0.7,
         ease: [0.22, 1, 0.36, 1],
       }
     }
@@ -180,7 +195,7 @@ const ProductsSection = () => {
                     background: 'rgba(255, 255, 255, 0.02)',
                     border: '1px solid rgba(255, 255, 255, 0.06)',
                   }}
-                  whileHover={{ 
+                  whileHover={isMobile ? {} : { 
                     y: -8,
                     borderColor: 'rgba(255, 255, 255, 0.12)',
                     transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
@@ -250,11 +265,11 @@ const ProductsSection = () => {
                       initial={{ opacity: 0, y: 10 }}
                       whileInView={{ opacity: 1, y: 0 }}
                       viewport={{ once: true }}
-                      transition={{ duration: 0.5, delay: index * 0.1 + 0.6 }}
+                      transition={{ duration: isMobile ? 0.3 : 0.5, delay: isMobile ? 0 : index * 0.1 + 0.6 }}
                     >
                       <motion.a
                         href={product.link}
-                        whileHover={{ 
+                        whileHover={isMobile ? {} : { 
                           scale: 1.02,
                           backgroundColor: 'rgba(255, 255, 255, 0.08)',
                           transition: { duration: 0.2 }
@@ -276,7 +291,7 @@ const ProductsSection = () => {
                       {product.status === 'Live' && (
                         <motion.a
                           href={product.link}
-                          whileHover={{ 
+                          whileHover={isMobile ? {} : { 
                             scale: 1.02,
                             backgroundColor: 'rgba(255, 255, 255, 0.04)',
                             transition: { duration: 0.2 }

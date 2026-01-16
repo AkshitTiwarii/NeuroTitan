@@ -5,14 +5,22 @@ import { useRef } from 'react';
 
 const AboutSection = () => {
   const sectionRef = useRef(null);
+  const [isMobile, setIsMobile] = React.useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768);
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
   
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ["start end", "end start"]
   });
 
-  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], [0, 1, 1, 0]);
-  const scale = useTransform(scrollYProgress, [0, 0.3], [0.95, 1]);
+  const opacity = useTransform(scrollYProgress, [0, 0.3, 0.7, 1], isMobile ? [1, 1, 1, 1] : [0, 1, 1, 0]);
+  const scale = useTransform(scrollYProgress, [0, 0.3], isMobile ? [1, 1] : [0.95, 1]);
 
   const pillars = [
     {
@@ -50,13 +58,13 @@ const AboutSection = () => {
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 60, scale: 0.9 },
+    hidden: { opacity: 0, y: isMobile ? 20 : 60, scale: isMobile ? 1 : 0.9 },
     visible: {
       opacity: 1,
       y: 0,
       scale: 1,
       transition: {
-        duration: 0.8,
+        duration: isMobile ? 0.4 : 0.8,
         ease: [0.22, 1, 0.36, 1], // Custom easing curve
       }
     }
@@ -140,7 +148,7 @@ const AboutSection = () => {
               <motion.div 
                 className="relative h-full p-8 rounded-sm transition-all duration-500 ease-out" 
                 style={{ background: 'rgba(255, 255, 255, 0.02)', border: '1px solid rgba(255, 255, 255, 0.06)' }}
-                whileHover={{ 
+                whileHover={isMobile ? {} : { 
                   y: -8,
                   transition: { duration: 0.3, ease: [0.22, 1, 0.36, 1] }
                 }}
@@ -159,7 +167,7 @@ const AboutSection = () => {
                 <div className="relative z-10">
                   {/* Icon */}
                   <motion.div
-                    whileHover={{ 
+                    whileHover={isMobile ? {} : { 
                       scale: 1.05,
                       rotate: [0, -5, 5, 0],
                       transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] }

@@ -204,27 +204,10 @@ const HeroSection = () => {
               transform: 'translateZ(0)'
             }}>
            
-            <a href="https://github.com/NeuroTitan-Hub" target="_blank" rel="noopener noreferrer" className="group w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-sm transition-all duration-200 active:scale-95 hover:shadow-lg" style={{ 
+            <a href="/echo" className="group w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-sm transition-all duration-200 active:scale-95 hover:shadow-lg" style={{ 
               background: '#FFFFFF', 
               color: '#0e0e0eff', 
               border: '1px solid #FFFFFF', 
-              touchAction: 'manipulation',
-              transform: 'translateZ(0)',
-              backfaceVisibility: 'hidden',
-              WebkitBackfaceVisibility: 'hidden',
-              willChange: 'transform, box-shadow'
-            }}>
-              <span className="inline-flex items-center gap-2">
-                Explore Projects
-                <svg className="w-4 h-4 transition-transform duration-300 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                </svg>
-              </span>
-            </a>
-             <a href="https://echoneuro.vercel.app/" target="_blank" rel="noopener noreferrer" className="group w-full sm:w-auto px-6 md:px-8 py-3 md:py-4 text-sm md:text-base font-medium rounded-sm transition-all duration-200 active:scale-95 hover:shadow-lg" style={{ 
-              background: 'transparent', 
-              color: '#f2e9e9ff', 
-              border: '1px solid #0EA5E9', 
               touchAction: 'manipulation',
               transform: 'translateZ(0)',
               backfaceVisibility: 'hidden',

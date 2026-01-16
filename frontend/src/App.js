@@ -4,6 +4,7 @@ import './App.css';
 import 'lenis/dist/lenis.css';
 import NeuroTitanHub from './pages/NeuroTitanHub';
 import SemiconductorPage from './pages/SemiconductorPage';
+import EchoPage from './pages/EchoPage';
 import useLenis from './hooks/useLenis';
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
         <Routes>
           <Route path="/" element={<NeuroTitanHub />} />
           <Route path="/semiconductor" element={<SemiconductorPage />} />
+          <Route path="/echo" element={<EchoPage />} />
         </Routes>
       </BrowserRouter>
     </div>
