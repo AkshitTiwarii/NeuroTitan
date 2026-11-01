@@ -83,6 +83,7 @@ NuroTitan/
 └── vercel.json        # Vercel deployment config
 ```
 
+<!--
 ## 👥 Team
 
 **Founder**
@@ -95,6 +96,7 @@ NuroTitan/
 **Developers**
 - [Akshit Tiwari](https://github.com/AkshitTiwarii)
 - [Rajan Jha](https://github.com/Rajan167030)
+-->
 
 ## 🔗 Links
 
