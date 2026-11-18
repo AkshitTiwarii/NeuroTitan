@@ -1,0 +1,26 @@
+{
+ "model": {
+  "vocab_size": 96,
+  "ctx": 256,
+  "n_layer": 4,
+  "n_head": 4,
+  "d_model": 192,
+  "dropout": 0.1
+ },
+ "train": {
+  "data": "data",
+  "run": "runs/titan-nano-v1",
+  "steps": 2200,
+  "bs": 32,
+  "lr": 0.001,
+  "warmup": 150,
+  "eval_every": 200,
+  "seed": 1337,
+  "threads": 24
+ },
+ "params": 1847424,
+ "torch": "2.11.0+cpu",
+ "threads": 24,
+ "train_chars": 10393363,
+ "val_chars": 886801
+}

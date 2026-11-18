@@ -1,0 +1,56 @@
+---
+import Base from "../../layouts/Base.astro";
+import PostList from "../../components/PostList.astro";
+import { getPublishedPosts } from "../../lib/posts";
+
+const posts = await getPublishedPosts();
+---
+
+<Base
+  title="Blog"
+  description="Experiments, reproductions and designs from NeuroTitan Labs, each published with the code and data that produced it."
+>
+  <section class="t-graphite page-hero">
+    <div class="wrap page-head">
+    <p class="label label--red">Blog</p>
+    <h1 class="display">Experiments, reproductions, designs.</h1>
+    <p class="lede">
+      Two posts a week when they are ready, rotating across machine learning, semiconductors and quantum computing.
+      A post that is not ready waits. <a href="/rss.xml">RSS feed</a>.
+    </p>
+    </div>
+  </section>
+
+  <section class="wrap list section">
+    {
+      posts.length > 0 ? (
+        <PostList posts={posts} />
+      ) : (
+        <p class="empty">
+          No posts yet. The first ones are being run and checked. Each will link to a public repository with its
+          code, data and seeds.
+        </p>
+      )
+    }
+  </section>
+</Base>
+
+<style>
+  .page-hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+
+
+  .list {
+    padding-bottom: clamp(4rem, 8vw, 6rem);
+  }
+
+  .empty {
+    border-top: 1px solid var(--ink);
+    padding-top: 1.5rem;
+    color: var(--ink-2);
+    max-width: var(--measure);
+  }
+</style>

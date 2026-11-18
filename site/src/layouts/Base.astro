@@ -1,0 +1,117 @@
+---
+/**
+ * Base layout: every page's <head> (title, description, canonical, Open Graph,
+ * Twitter card, JSON-LD) plus header and footer. Pages pass their own metadata,
+ * so each route is distinct to crawlers and link previews.
+ */
+import "../styles/global.css";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import { SITE } from "../data/site";
+
+interface Props {
+  title?: string;
+  description?: string;
+  image?: string;
+  type?: "website" | "article";
+  jsonLd?: Record<string, unknown>;
+  noindex?: boolean;
+}
+
+const {
+  title,
+  description = SITE.description,
+  image = "/og-default.png",
+  type = "website",
+  jsonLd,
+  noindex = false,
+} = Astro.props;
+
+const fullTitle = title ? `${title} | ${SITE.name}` : `${SITE.name}: machine learning, semiconductors, quantum computing`;
+const canonical = new URL(Astro.url.pathname.replace(/\/$/, "") || "/", SITE.url).href;
+const imageUrl = new URL(image, SITE.url).href;
+
+const orgLd = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: SITE.name,
+  url: SITE.url,
+  logo: new URL("/apple-touch-icon.png", SITE.url).href,
+  email: SITE.email,
+  sameAs: [SITE.github],
+};
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{fullTitle}</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    {noindex && <meta name="robots" content="noindex" />}
+
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="icon" href="/favicon.ico" sizes="32x32" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <meta name="theme-color" content="#0f0f0f" />
+    <link rel="alternate" type="application/rss+xml" title={`${SITE.name} blog`} href="/rss.xml" />
+    <link rel="sitemap" href="/sitemap-index.xml" />
+
+    <meta property="og:type" content={type} />
+    <meta property="og:site_name" content={SITE.name} />
+    <meta property="og:title" content={title ?? SITE.name} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={imageUrl} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title ?? SITE.name} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={imageUrl} />
+
+    <script type="application/ld+json" set:html={JSON.stringify(jsonLd ?? orgLd)} />
+    <script is:inline src="/analytics.js" defer></script>
+  </head>
+  <body>
+    <a class="skip" href="#main">Skip to content</a>
+    <Header />
+    <main id="main">
+      <slot />
+    </main>
+    <Footer />
+    <script>
+      // Scroll reveal. Anything at or above the reveal line is shown, so fast scrolls and
+      // anchor jumps can never leave a section hidden. Without JS, nothing is hidden at all.
+      const pending = new Set(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduce && pending.size) {
+        const check = () => {
+          const line = innerHeight * 0.92;
+          for (const el of pending) {
+            if (el.getBoundingClientRect().top < line) {
+              el.classList.add("is-in");
+              pending.delete(el);
+            }
+          }
+          if (!pending.size) removeEventListener("scroll", onScroll);
+        };
+        let queued = false;
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            check();
+          });
+        };
+        check(); // reveal what is on screen before hiding anything
+        document.documentElement.classList.add("js");
+        addEventListener("scroll", onScroll, { passive: true });
+        addEventListener("resize", onScroll, { passive: true });
+      }
+    </script>
+  </body>
+</html>

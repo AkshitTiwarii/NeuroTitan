@@ -1,0 +1,139 @@
+---
+import Base from "../layouts/Base.astro";
+import { FIELDS } from "../data/site";
+---
+
+<Base
+  title="Research"
+  description="What NeuroTitan Labs studies in machine learning, semiconductor design and quantum computing, the tools we use, and how results are checked."
+>
+  <section class="t-graphite page-hero">
+    <div class="wrap page-head">
+    <p class="label label--red">Research</p>
+    <h1 class="display">What we study and how we check it.</h1>
+    <p class="lede">
+      Three fields, one rule: a result is not finished until someone other than its author has rerun it from the
+      published code and got the same numbers.
+    </p>
+    <nav class="jump" aria-label="Fields on this page">
+      {FIELDS.map((f) => <a href={`#${f.id}`}>{f.index} {f.name}</a>)}
+    </nav>
+    </div>
+  </section>
+
+  {
+    FIELDS.map((f) => (
+      <section class="section" id={f.id} aria-labelledby={`${f.id}-title`}>
+        <div class="wrap field">
+          <div>
+            <p class="label label--red">{f.index}</p>
+            <h2 id={`${f.id}-title`}>{f.name}</h2>
+          </div>
+          <div class="body">
+            <p class="lede">{f.summary}</p>
+            {f.detail.map((d) => <p>{d}</p>)}
+            <div class="tools">
+              <p class="label">Tools</p>
+              <ul>
+                {f.tools.map((t) => <li>{t}</li>)}
+              </ul>
+            </div>
+            {f.href.startsWith("/") && !f.href.includes("#") && (
+              <p>
+                <a class="button button--ghost" href={f.href}>Open the {f.name.toLowerCase()} page →</a>
+              </p>
+            )}
+            <p class="status">
+              <span class="label">Status</span> First experiments are in progress. Results will appear on the{" "}
+              <a href="/blog">blog</a> with their code.
+            </p>
+          </div>
+        </div>
+      </section>
+    ))
+  }
+</Base>
+
+<style>
+  .page-hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+  }
+
+  .jump a {
+    text-decoration: none;
+    color: var(--ink-2);
+  }
+
+  .jump a:hover {
+    color: var(--red);
+  }
+
+  .section {
+    scroll-margin-top: 1rem;
+  }
+
+  .field {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: clamp(1.5rem, 5vw, 4rem);
+  }
+
+  .field h2 {
+    font-size: clamp(2rem, 3.5vw, 2.75rem);
+    margin-top: 0.5rem;
+  }
+
+  .body {
+    display: grid;
+    gap: 1.1rem;
+    max-width: var(--measure);
+  }
+
+  .body > p:not(.lede):not(.status) {
+    color: var(--ink-2);
+  }
+
+  .tools ul {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    list-style: none;
+    margin: 0.6rem 0 0;
+    padding: 0;
+  }
+
+  .tools li {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    border: 1px solid var(--rule);
+    padding: 0.2rem 0.55rem;
+    background: var(--paper-2);
+  }
+
+  .status {
+    border-left: 2px solid var(--red);
+    padding-left: 0.9rem;
+    color: var(--ink-2);
+  }
+
+  .status .label {
+    margin-right: 0.5rem;
+  }
+
+  @media (max-width: 56rem) {
+    .field {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

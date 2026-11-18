@@ -1,0 +1,478 @@
+---
+/**
+ * Live Titan-nano demo. Everything shown is computed in the visitor's browser
+ * by src/lib/titan.ts from the shipped int8 weights: the completion, the
+ * next-character probabilities and the attention shading. Nothing is sent to
+ * a server. The weights load only when the demo scrolls into view or is used.
+ */
+interface Props {
+  weightsBytes: number;
+  nLayer: number;
+  nHead: number;
+}
+const { weightsBytes, nLayer, nHead } = Astro.props;
+const layers = Array.from({ length: nLayer }, (_, i) => i);
+const heads = Array.from({ length: nHead }, (_, i) => i);
+const mb = (weightsBytes / 1e6).toFixed(1);
+const presets = [
+  { label: "class", text: "class Stack:\n    def __init__(self):\n        " },
+  { label: "loop", text: "def count_words(path):\n    counts = {}\n    with open(path) as f:\n        for line in f:\n            " },
+  { label: "import", text: "import os\nimport sys\n\n\ndef main():\n    " },
+  { label: "error handling", text: "    try:\n        value = int(text)\n    except " },
+];
+---
+
+<div class="demo card" id="demo" data-titan-demo data-mb={mb}>
+  <div class="bar">
+    <p class="label label--red">Titan-nano · live in your browser</p>
+    <p class="label status" data-status>Model loads when you reach this panel ({mb} MB)</p>
+  </div>
+
+  <div class="presets" role="group" aria-label="Example prompts">
+    {presets.map((p) => <button type="button" data-preset={p.text}>{p.label}</button>)}
+  </div>
+
+  <div class="grid">
+    <div class="left">
+      <label class="visually-hidden" for="titan-input">Python code for Titan-nano to continue</label>
+      <textarea id="titan-input" data-input rows="7" spellcheck="false">{presets[0].text}</textarea>
+      <div class="controls">
+        <button type="button" class="button" data-run disabled>Complete</button>
+        <button type="button" class="button button--ghost" data-step disabled>Next character</button>
+        <label class="temp">
+          <span class="label">Temperature</span>
+          <input type="range" min="0" max="1" step="0.1" value="0.5" data-temp />
+          <output data-temp-out>0.5</output>
+        </label>
+      </div>
+      <div class="output-wrap">
+        <p class="label">Prompt <span class="key key--p"></span> · Titan-nano <span class="key key--g"></span> · shading = attention of the last character</p>
+        <pre class="output" data-output aria-live="polite"></pre>
+      </div>
+    </div>
+
+    <aside class="right">
+      <div>
+        <p class="label">Next character, model's probabilities</p>
+        <ol class="probs" data-probs></ol>
+      </div>
+      <div>
+        <p class="label">Attention shown</p>
+        <div class="sel">
+          <label><span class="visually-hidden">Layer</span>
+            <select data-layer>
+              {layers.map((l) => <option value={l} selected={l === nLayer - 1}>Layer {l + 1}</option>)}
+            </select>
+          </label>
+          <label><span class="visually-hidden">Head</span>
+            <select data-head>
+              <option value="-1" selected>All heads (mean)</option>
+              {heads.map((h) => <option value={h}>Head {h + 1}</option>)}
+            </select>
+          </label>
+        </div>
+        <p class="hint">Darker red = the last character drew more of its information from there. These are the model's real attention weights for the most recent step.</p>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script>
+  import { Titan, choose, type StepResult, type TitanManifest } from "../lib/titan";
+
+  const root = document.querySelector<HTMLElement>("[data-titan-demo]");
+  if (root) {
+    const $ = <T extends Element>(s: string) => root.querySelector<T>(s)!;
+    const input = $<HTMLTextAreaElement>("[data-input]");
+    const output = $<HTMLPreElement>("[data-output]");
+    const probsEl = $<HTMLOListElement>("[data-probs]");
+    const status = $<HTMLElement>("[data-status]");
+    const runBtn = $<HTMLButtonElement>("[data-run]");
+    const stepBtn = $<HTMLButtonElement>("[data-step]");
+    const temp = $<HTMLInputElement>("[data-temp]");
+    const tempOut = $<HTMLOutputElement>("[data-temp-out]");
+    const layerSel = $<HTMLSelectElement>("[data-layer]");
+    const headSel = $<HTMLSelectElement>("[data-head]");
+
+    let model: Titan | null = null;
+    let loading: Promise<Titan> | null = null;
+    let prompt = input.value;
+    let generated = "";
+    let last: StepResult | null = null;
+    let busy = false;
+
+    function load(): Promise<Titan> {
+      loading ??= (async () => {
+        status.textContent = `Loading Titan-nano (${root!.dataset.mb} MB)…`;
+        const [manifest, buf] = await Promise.all([
+          fetch("/models/titan-nano/model.json").then((r) => r.json() as Promise<TitanManifest>),
+          fetch("/models/titan-nano/weights.bin").then((r) => r.arrayBuffer()),
+        ]);
+        model = new Titan(manifest, buf);
+        status.textContent = "Model loaded · running on this device";
+        runBtn.disabled = false;
+        stepBtn.disabled = false;
+        restart();
+        return model;
+      })();
+      return loading;
+    }
+
+    const visible = (c: string) => (c === "\n" ? "↵" : c === " " ? "␠" : c);
+
+    const channel = new MessageChannel();
+    const waiting: (() => void)[] = [];
+    channel.port1.onmessage = () => waiting.shift()?.();
+    const yieldToBrowser = () =>
+      new Promise<void>((resolve) => {
+        waiting.push(resolve);
+        channel.port2.postMessage(0);
+      });
+
+    function restart() {
+      if (!model) return;
+      prompt = input.value;
+      generated = "";
+      last = model.prime(prompt.slice(-model.cfg.ctx));
+      render();
+    }
+
+    /** Feed one character, sliding the window when the 256-character context is full. */
+    function feed(ch: string) {
+      const m = model!;
+      generated += ch;
+      if (m.length >= m.cfg.ctx) {
+        last = m.prime((prompt + generated).slice(-Math.floor(m.cfg.ctx * 0.75)));
+      } else {
+        last = m.step(m.encode(ch)[0]);
+      }
+    }
+
+    function nextChar(): string {
+      const m = model!;
+      return m.vocab[choose(last!.probs, Number(temp.value), 8)];
+    }
+
+    function render() {
+      if (!model || !last) return;
+      const text = prompt + generated;
+      const window = text.slice(-model.length);
+      const offset = text.length - window.length;
+      const layer = Number(layerSel.value);
+      const head = Number(headSel.value);
+      const heads = last.attention[layer];
+      const w = new Float32Array(window.length);
+      if (head < 0) {
+        heads.forEach((hw) => hw.forEach((v, i) => (w[i] += v / heads.length)));
+      } else {
+        heads[head].forEach((v, i) => (w[i] = v));
+      }
+      const max = Math.max(...w, 1e-6);
+      const frag = document.createDocumentFragment();
+      if (offset > 0) frag.append(document.createTextNode(text.slice(0, offset)));
+      for (let i = 0; i < window.length; i++) {
+        const span = document.createElement("span");
+        span.textContent = window[i];
+        span.className = offset + i < prompt.length ? "p" : "g";
+        const a = w[i] / max;
+        if (a > 0.04) span.style.backgroundColor = `rgba(163, 33, 27, ${(a * 0.55).toFixed(3)})`;
+        frag.append(span);
+      }
+      const caret = document.createElement("span");
+      caret.className = "caret";
+      frag.append(caret);
+      output.replaceChildren(frag);
+      output.scrollTop = output.scrollHeight;
+
+      const top = Array.from(last.probs.keys()).sort((a, b) => last!.probs[b] - last!.probs[a]).slice(0, 8);
+      probsEl.replaceChildren(
+        ...top.map((i) => {
+          const li = document.createElement("li");
+          const p = last!.probs[i];
+          li.innerHTML = `<code></code><span class="barwrap"><span class="barfill"></span></span><span class="pct"></span>`;
+          li.querySelector("code")!.textContent = visible(model!.vocab[i]);
+          (li.querySelector(".barfill") as HTMLElement).style.width = `${(p * 100).toFixed(1)}%`;
+          li.querySelector(".pct")!.textContent = `${(p * 100).toFixed(1)}%`;
+          return li;
+        }),
+      );
+    }
+
+    async function complete(n = 160) {
+      if (busy) return;
+      busy = true;
+      runBtn.disabled = true;
+      await load();
+      restart();
+      // Time-sliced: generate for ~30 ms, draw, yield. Yields go through a
+      // MessageChannel, which browsers do not clamp the way they clamp timers and
+      // animation frames in background tabs, so generation keeps its speed.
+      let done = 0;
+      while (done < n) {
+        const sliceEnd = performance.now() + 30;
+        while (done < n && performance.now() < sliceEnd) {
+          feed(nextChar());
+          done++;
+        }
+        render();
+        await yieldToBrowser();
+      }
+      busy = false;
+      runBtn.disabled = false;
+    }
+
+    runBtn.addEventListener("click", () => complete());
+    stepBtn.addEventListener("click", async () => {
+      await load();
+      if (input.value !== prompt) restart();
+      feed(nextChar());
+      render();
+    });
+    temp.addEventListener("input", () => (tempOut.value = temp.value));
+    layerSel.addEventListener("change", render);
+    headSel.addEventListener("change", render);
+    input.addEventListener("input", () => {
+      if (model) restart();
+    });
+    root.querySelectorAll<HTMLButtonElement>("[data-preset]").forEach((b) =>
+      b.addEventListener("click", async () => {
+        input.value = b.dataset.preset ?? "";
+        await load();
+        restart();
+      }),
+    );
+
+    // Load when the panel approaches the viewport, or immediately if it is already close.
+    const near = () => root.getBoundingClientRect().top < innerHeight + 400;
+    if (near()) load();
+    else {
+      const onScroll = () => {
+        if (near()) {
+          removeEventListener("scroll", onScroll);
+          load();
+        }
+      };
+      addEventListener("scroll", onScroll, { passive: true });
+    }
+  }
+</script>
+
+<style>
+  .demo {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .presets button,
+  select {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    padding: 0.35rem 0.7rem;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+    cursor: pointer;
+  }
+
+  .presets button:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: 1.6fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .left {
+    display: grid;
+    gap: 0.9rem;
+    align-content: start;
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    line-height: 1.5;
+    padding: 0.8rem 0.9rem;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    color: var(--ink);
+  }
+
+  textarea:focus {
+    outline: 2px solid var(--red);
+    outline-offset: 0;
+  }
+
+  .controls {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  .button:disabled {
+    opacity: 0.45;
+    cursor: wait;
+  }
+
+  .temp {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    margin-left: auto;
+  }
+
+  .temp input {
+    accent-color: var(--red);
+  }
+
+  .output-wrap {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .key {
+    display: inline-block;
+    width: 0.7rem;
+    height: 0.7rem;
+    vertical-align: middle;
+    margin-left: 0.2rem;
+  }
+
+  .key--p {
+    background: var(--ink);
+  }
+
+  .key--g {
+    background: var(--red);
+  }
+
+  .output {
+    margin: 0;
+    min-height: 13rem;
+    max-height: 22rem;
+    overflow: auto;
+    padding: 0.9rem 1rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+  }
+
+  .output :global(.p) {
+    color: var(--ink);
+  }
+
+  .output :global(.g) {
+    color: var(--red);
+    font-weight: 500;
+  }
+
+  .output :global(.caret) {
+    display: inline-block;
+    width: 0.55em;
+    height: 1.1em;
+    vertical-align: text-bottom;
+    background: var(--red);
+    animation: blink 1s steps(1) infinite;
+  }
+
+  @keyframes blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  .right {
+    display: grid;
+    gap: 1.5rem;
+    align-content: start;
+  }
+
+  .probs {
+    list-style: none;
+    margin: 0.6rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.35rem;
+    min-height: 14rem;
+  }
+
+  .probs :global(li) {
+    display: grid;
+    grid-template-columns: 2.2rem 1fr 3.4rem;
+    align-items: center;
+    gap: 0.5rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+  }
+
+  .probs :global(code) {
+    text-align: center;
+    border: 1px solid var(--rule);
+    background: var(--paper);
+    padding: 0.05rem 0;
+  }
+
+  .probs :global(.barwrap) {
+    height: 0.6rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+  }
+
+  .probs :global(.barfill) {
+    display: block;
+    height: 100%;
+    background: var(--red);
+  }
+
+  .probs :global(.pct) {
+    text-align: right;
+    color: var(--ink-2);
+  }
+
+  .sel {
+    display: flex;
+    gap: 0.5rem;
+    margin: 0.6rem 0;
+  }
+
+  .hint {
+    font-size: 0.875rem;
+    color: var(--grey);
+  }
+
+  @media (max-width: 60rem) {
+    .grid {
+      grid-template-columns: 1fr;
+    }
+
+    .temp {
+      margin-left: 0;
+    }
+  }
+</style>

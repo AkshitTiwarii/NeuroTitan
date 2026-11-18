@@ -1,0 +1,543 @@
+---
+import Base from "../layouts/Base.astro";
+import FieldCanvas from "../components/FieldCanvas.astro";
+import Ticker from "../components/Ticker.astro";
+import PostList from "../components/PostList.astro";
+import { FIELDS, PILLARS, PRINCIPLES, PRODUCTS, SITE, TOOLS, CAMPUS_AMBASSADOR_FORM } from "../data/site";
+import { getPublishedPosts } from "../lib/posts";
+import { getOrgStats } from "../lib/github";
+import titan from "../data/titan-nano.json";
+
+const allPosts = await getPublishedPosts();
+const posts = allPosts.slice(0, 3);
+const stats = await getOrgStats();
+const featured = PRODUCTS.slice(0, 4);
+const sample = titan.samples[0];
+const gainPct = ((1 - titan.test.int8.bpc / titan.baselines.test_bpc_best_order) * 100).toFixed(0);
+const titanParams = (titan.params / 1e6).toFixed(1);
+---
+
+<Base>
+  <!-- HERO: graphite stage -->
+  <section class="hero t-graphite">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="label label--red">NeuroTitan Labs · independent research</p>
+        <h1 class="display">Research you can rerun.</h1>
+        <p class="lede">
+          We work on machine learning, chip design and quantum computing. Every result ships with the code, data and
+          random seeds that produced it, and we publish what did not work next to what did.
+        </p>
+        <div class="actions">
+          <a class="button" href="/ai">Explore NeuroTitan AI</a>
+          <a class="button button--ghost" href="/research">Research areas</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <FieldCanvas />
+      </div>
+    </div>
+  </section>
+
+  <Ticker items={TOOLS} label="Tools we use" />
+
+  <!-- FIELDS: paper with dot grid -->
+  <section class="section dots">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">01 · Fields</p>
+          <h2>Three fields, one standard of evidence</h2>
+        </div>
+        <p class="lede">
+          A result is not finished until someone other than its author has rerun it from the published code and got
+          the same numbers.
+        </p>
+      </div>
+      <div class="bento">
+        {
+          FIELDS.map((f) => (
+            <a class="field card" href={f.href} data-reveal>
+              <span class="label label--red">{f.index}</span>
+              <h3>{f.name}</h3>
+              <p>{f.summary}</p>
+              <span class="more label">Open →</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- AI: graphite with a console -->
+  <section class="section t-graphite ai">
+    <div class="wrap ai-grid">
+      <div data-reveal>
+        <p class="label">02 · NeuroTitan AI</p>
+        <h2>Titan-nano: our first model, built from scratch</h2>
+        <p class="lede">
+          A {titanParams}-million-parameter transformer we designed and trained in-house on Python code. On code it never
+          saw, it needs {gainPct}% fewer bits per character than the best classical model. It runs in your browser on our
+          own inference engine, and you can watch its real attention as it writes.
+        </p>
+        <div class="actions">
+          <a class="button" href="/ai#demo">Try Titan-nano</a>
+          <a class="button button--ghost" href="/ai#results">See the results</a>
+        </div>
+      </div>
+      <div class="console" data-reveal aria-label="A real completion from Titan-nano">
+        <div class="console-bar"><i></i><i></i><i></i><span>titan-nano · unedited sample · temperature {sample.temperature} · seed {sample.seed}</span></div>
+        <pre class="console-body sample"><span class="prompt-text">{sample.prompt}</span><span class="gen">{sample.completion}</span></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">03 · Products</p>
+          <h2>What we are building</h2>
+        </div>
+        <p class="lede">Each one is labelled with where it really stands.</p>
+      </div>
+      <div class="products">
+        {
+          featured.map((p) => (
+            <article class="product card" data-reveal>
+              <header>
+                <h3>{p.name}</h3>
+                <span class={`pill pill--${p.kind}`}>{p.status}</span>
+              </header>
+              <p>{p.summary}</p>
+              <p class="links">
+                {p.links.map((l) => (
+                  <a href={l.href} rel={l.href.startsWith("http") ? "noopener" : undefined}>
+                    {l.label} →
+                  </a>
+                ))}
+              </p>
+            </article>
+          ))
+        }
+      </div>
+      <p class="all"><a href="/products">All products →</a></p>
+    </div>
+  </section>
+
+  <!-- NUMBERS: concrete band, only computed values -->
+  <section class="section t-concrete">
+    <div class="wrap numbers">
+      <div data-reveal>
+        <p class="label">04 · The lab in numbers</p>
+        <h2>Counted, not claimed</h2>
+        <p class="muted note">
+          These numbers are computed when the site is built, from GitHub and from this site's own content. Nothing
+          here is typed in by hand.
+        </p>
+      </div>
+      <dl class="tiles" data-reveal>
+        <div class="tile">
+          <dt class="label">Public repositories</dt>
+          <dd>{stats.publicRepos ?? "—"}</dd>
+          <dd class="src">GitHub · {SITE.githubOrg} · {stats.fetchedAt}</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Posts published</dt>
+          <dd>{allPosts.filter((p) => !p.data.draft).length}</dd>
+          <dd class="src">This site · first posts in review</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Research fields</dt>
+          <dd>{FIELDS.length}</dd>
+          <dd class="src">ML · semiconductors · quantum</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Products in progress</dt>
+          <dd>{PRODUCTS.filter((p) => p.kind === "dev").length}</dd>
+          <dd class="src">See products</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- BLOG -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">05 · Blog</p>
+          <h2>From the lab notebook</h2>
+        </div>
+        <p class="lede">Two posts a week when they are ready. A post that is not ready waits.</p>
+      </div>
+      {
+        posts.length > 0 ? (
+          <PostList posts={posts} />
+        ) : (
+          <div class="empty card" data-reveal>
+            <p class="label label--red">Coming soon</p>
+            <p>
+              The first posts are being run and checked now. Each one will link to a public repository you can
+              rerun. <a href="/rss.xml">Follow by RSS</a> or visit the <a href="/blog">blog</a>.
+            </p>
+          </div>
+        )
+      }
+    </div>
+  </section>
+
+  <!-- STANDARDS + PILLARS -->
+  <section class="section dots">
+    <div class="wrap two-col">
+      <div class="section-head" data-reveal>
+        <p class="label">06 · How we work</p>
+        <h2>The rules every result follows</h2>
+      </div>
+      <dl class="principles" data-reveal>
+        {
+          [...PRINCIPLES, ...PILLARS].slice(0, 6).map((p, i) => (
+            <div>
+              <dt>
+                <span class="label label--red">{String(i + 1).padStart(2, "0")}</span>
+                {p.title}
+              </dt>
+              <dd>{p.body}</dd>
+            </div>
+          ))
+        }
+      </dl>
+    </div>
+  </section>
+
+  <!-- COMMUNITY + TEAM: concrete band -->
+  <section class="section t-concrete">
+    <div class="wrap two-col">
+      <div class="section-head" data-reveal>
+        <p class="label">07 · Community</p>
+        <h2>Join the lab</h2>
+        <p class="muted">Contribute on GitHub, represent the lab on your campus, or write to us.</p>
+      </div>
+      <ul class="join" data-reveal>
+        <li>
+          <span class="label label--red">GitHub</span>
+          <p>Every repository is public. Issues and pull requests are welcome.</p>
+          <a href={SITE.github} rel="noopener">github.com/{SITE.githubOrg} ↗</a>
+        </li>
+        <li>
+          <span class="label label--red">Campus ambassadors</span>
+          <p>Students who want to represent the lab and run sessions at their college.</p>
+          <a href={CAMPUS_AMBASSADOR_FORM} rel="noopener">Apply ↗</a>
+        </li>
+        <li>
+          <span class="label label--red">Corrections and collaboration</span>
+          <p>Found an error in something we published, or want to work with us.</p>
+          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+        </li>
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  .hero-grid {
+    display: grid;
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+    min-height: min(84vh, 52rem);
+    padding-block: clamp(3rem, 8vw, 6rem);
+  }
+
+  .hero-text {
+    display: grid;
+    gap: 1.6rem;
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.85rem;
+    margin-top: 0.5rem;
+  }
+
+  .bento {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .field {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    padding: 1.75rem;
+    text-decoration: none;
+    min-height: 20rem;
+    transition: transform 160ms ease, box-shadow 160ms ease;
+  }
+
+  .field:hover {
+    color: inherit;
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--red);
+  }
+
+  .field h3 {
+    font-size: 1.85rem;
+  }
+
+  .field p {
+    color: var(--ink-2);
+  }
+
+  .field .more {
+    margin-top: auto;
+    align-self: end;
+  }
+
+  .ai-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+
+  .ai h2,
+  .numbers h2 {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    margin-block: 0.85rem 1.25rem;
+  }
+
+  .ai .console {
+    box-shadow: 8px 8px 0 #000;
+  }
+
+  .sample {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 9rem;
+  }
+
+  .sample .prompt-text {
+    color: var(--ink);
+  }
+
+  .sample .gen {
+    color: var(--red);
+  }
+
+  .products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .product {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    padding: 1.6rem;
+  }
+
+  .product header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .product h3 {
+    font-size: 1.6rem;
+  }
+
+  .product p {
+    color: var(--ink-2);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+  }
+
+  .links a,
+  .all a {
+    color: var(--red);
+    text-decoration: none;
+  }
+
+  .all {
+    margin-top: 2rem;
+    font-family: var(--mono);
+    font-size: 0.875rem;
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+
+  .note {
+    max-width: 30rem;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--ink);
+    border-left: 1px solid var(--ink);
+  }
+
+  .tile {
+    padding: 1.4rem 1.5rem;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
+  }
+
+  .tile dd:not(.src) {
+    margin: 0.5rem 0 0.4rem;
+    font-family: var(--mono);
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .tile:first-child dd {
+    color: var(--red);
+  }
+
+  .src {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--grey);
+  }
+
+  .empty {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.75rem;
+    max-width: 44rem;
+  }
+
+  .empty a {
+    color: var(--red);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .principles {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem 2.5rem;
+    margin: 0;
+  }
+
+  .principles dt {
+    display: grid;
+    gap: 0.4rem;
+    font-weight: 600;
+    margin-bottom: 0.45rem;
+  }
+
+  .principles dd {
+    margin: 0;
+    color: var(--ink-2);
+  }
+
+  .join {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border-top: 1px solid var(--ink);
+  }
+
+  .join li {
+    display: grid;
+    grid-template-columns: 14rem 1fr auto;
+    align-items: baseline;
+    gap: 1rem;
+    padding-block: 1.2rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .join p {
+    color: var(--ink-2);
+  }
+
+  .join a {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    color: var(--red);
+    text-decoration: none;
+    overflow-wrap: anywhere;
+  }
+
+  @media (max-width: 64rem) {
+    .bento {
+      grid-template-columns: 1fr;
+    }
+
+    .field {
+      min-height: 0;
+    }
+  }
+
+  @media (max-width: 56rem) {
+    .hero-grid,
+    .ai-grid,
+    .numbers,
+    .two-col,
+    .products {
+      grid-template-columns: 1fr;
+    }
+
+    .hero-grid {
+      min-height: 0;
+    }
+
+    .hero-visual {
+      max-width: 26rem;
+      width: 100%;
+      justify-self: center;
+    }
+
+    .principles {
+      grid-template-columns: 1fr;
+    }
+
+    .join li {
+      grid-template-columns: 1fr;
+      gap: 0.35rem;
+    }
+  }
+
+  @media (max-width: 30rem) {
+    .tiles {
+      grid-template-columns: 1fr;
+    }
+
+  }
+</style>

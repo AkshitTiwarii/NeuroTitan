@@ -1,0 +1,33 @@
+---
+/**
+ * The lab mark: an N drawn on a square, with a red point at the end of the
+ * diagonal. Same geometry as public/favicon.svg; colours follow the palette.
+ */
+interface Props {
+  size?: number;
+}
+const { size = 24 } = Astro.props;
+---
+
+<svg width={size} height={size} viewBox="0 0 32 32" aria-hidden="true" focusable="false">
+  <rect class="bg" width="32" height="32" rx="3"></rect>
+  <path class="n" d="M9 24V8l14 16V8"></path>
+  <rect class="dot" x="21" y="5.5" width="5" height="5"></rect>
+</svg>
+
+<style>
+  .bg {
+    fill: var(--mark-bg);
+  }
+
+  .n {
+    fill: none;
+    stroke: var(--mark-fg);
+    stroke-width: 3;
+    stroke-linecap: square;
+  }
+
+  .dot {
+    fill: var(--mark-red);
+  }
+</style>

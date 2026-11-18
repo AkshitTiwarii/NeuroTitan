@@ -79,3 +79,17 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/0.pack
+
+# Astro
+site/.astro/
+site/dist/
+
+# Local env files, never committed
+.env
+.env.*
+site/src/.astro/
+
+# Titan-nano: regenerable data and float checkpoints
+research/titan-nano/data/
+research/titan-nano/runs/*/best.pt
+research/titan-nano/__pycache__/

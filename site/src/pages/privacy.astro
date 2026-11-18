@@ -1,0 +1,68 @@
+---
+import Base from "../layouts/Base.astro";
+import { SITE } from "../data/site";
+---
+
+<Base title="Privacy" description="What this website measures about visitors, which services receive it, and how to opt out.">
+  <article class="wrap prose-page">
+    <p class="label label--red">Privacy</p>
+    <h1>What this site measures</h1>
+    <p class="updated label">Last updated 18 November 2026</p>
+
+    <h2>Analytics</h2>
+    <p>
+      We use two analytics services to count visits and see which pages are read: Google Analytics 4 (run by
+      Google) and PostHog (run by PostHog Inc., data stored in the United States). They receive the page address,
+      the referring page, your browser and device type, an approximate location derived from your IP address, and
+      an identifier stored in your browser so repeat visits can be counted.
+    </p>
+    <p>
+      We do not record sessions, keystrokes or mouse movement. PostHog session recording and automatic click capture
+      are switched off in our configuration.
+    </p>
+
+    <h2>3D models</h2>
+    <p>
+      The semiconductors page can show interactive 3D models hosted by Sketchfab. Nothing from Sketchfab loads until you
+      press "Load interactive model". After that, Sketchfab's own privacy policy applies to that frame.
+    </p>
+
+    <h2>How to opt out</h2>
+    <p>
+      If your browser sends a Do Not Track or Global Privacy Control signal, neither analytics service is loaded at
+      all. Blocking scripts from googletagmanager.com and posthog.com has the same effect. The site works the same
+      either way.
+    </p>
+
+    <h2>What we do not do</h2>
+    <p>
+      There are no accounts or advertising on this site. We do not sell or share visitor data with anyone
+      beyond the two services above.
+    </p>
+
+    <h2>Contact</h2>
+    <p>Questions or requests about your data: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.</p>
+  </article>
+</Base>
+
+<style>
+  .prose-page {
+    max-width: calc(var(--measure) + 2 * var(--gutter));
+    padding-block: clamp(3rem, 8vw, 5rem);
+    display: grid;
+    gap: 1rem;
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.25rem);
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    margin-top: 1.5rem;
+  }
+
+  p {
+    color: var(--ink-2);
+  }
+</style>

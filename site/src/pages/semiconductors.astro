@@ -1,0 +1,375 @@
+---
+import Base from "../layouts/Base.astro";
+import ModelEmbed from "../components/ModelEmbed.astro";
+import { FIELDS } from "../data/site";
+
+const semi = FIELDS.find((f) => f.id === "semiconductors")!;
+
+const flow = [
+  ["RTL", "Verilog", "The design as code, with a testbench that checks it against a reference model."],
+  ["Synthesis", "Yosys", "Code becomes a netlist of standard cells from the sky130 library."],
+  ["Place and route", "OpenROAD", "Cells get positions on the die and wires on the metal layers; timing is checked."],
+  ["Layout", "Magic", "The physical shapes that would be sent to a fab, checked against design rules."],
+  ["Simulation", "ngspice", "Transistor-level behaviour: delay, power and how they change with voltage."],
+] as const;
+
+const journey = [
+  {
+    id: "wafer",
+    title: "Silicon wafer fabrication",
+    body: [
+      "A single crystal of silicon is grown, sliced into thin wafers and polished. Each wafer then goes through hundreds of steps that repeat one pattern: deposit or grow a layer, coat it with light-sensitive resist, expose a pattern through a mask (photolithography), etch away what is not wanted, and add dopants by ion implantation to change how the silicon conducts.",
+      "Hundreds of identical chips (dies) are built side by side on one wafer, tested, then cut apart and packaged.",
+    ],
+  },
+  {
+    id: "transistor",
+    title: "Transistor architecture",
+    body: [
+      "A MOSFET is a switch: a voltage on the gate lets current flow between source and drain, or stops it. Logic is built from pairs of these switches.",
+      "For decades transistors were flat (planar). As they shrank, the gate lost control of the channel, so the industry moved to FinFETs, where the gate wraps three sides of a raised fin, and now to gate-all-around nanosheets at the most advanced nodes. One correction to a common belief: the “5 nm” or “3 nm” in a process name is a generation label, not the physical length of any feature on the chip.",
+    ],
+  },
+  {
+    id: "interconnect",
+    title: "Multi-layer interconnects",
+    body: [
+      "Transistors sit at the bottom of the chip. Above them, layers of metal wiring separated by insulator connect them to each other, to power and to the outside world. Lower layers are thin and dense for short local wires; upper layers are thick for long wires and power.",
+      "The open SkyWater 130 nm process we use has a local interconnect layer plus five metal layers. The most advanced commercial processes use more than ten.",
+    ],
+  },
+];
+---
+
+<Base
+  title="Semiconductors"
+  description="What semiconductors are, how chips are made, and how NeuroTitan Labs designs circuits on the open SkyWater 130 nm process with open-source tools."
+>
+  <section class="hero t-graphite">
+    <div class="wrap page-head">
+      <p class="label label--red">Semiconductors · NeuroTitan Labs</p>
+      <h1 class="display">From transistor to layout, in the open.</h1>
+      <p class="lede">{semi.summary}</p>
+      <nav class="jump" aria-label="On this page">
+        <a href="#basics">Basics</a><a href="#flow">Our flow</a><a href="#models">3D models</a><a href="#journey">How chips are made</a><a href="#topics">Topics</a>
+      </nav>
+    </div>
+  </section>
+
+  <section class="section dots" id="basics">
+    <div class="wrap basics">
+      <article class="card" data-reveal>
+        <p class="label label--red">What are semiconductors?</p>
+        <p>
+          Materials whose electrical conductivity can be precisely controlled, enabling logic, memory, sensing and
+          power regulation in electronic devices.
+        </p>
+      </article>
+      <article class="card" data-reveal>
+        <p class="label label--red">Why they matter</p>
+        <p>
+          Every modern system (computing, communication, energy) relies on semiconductor devices operating at
+          nanometre scales to process information and control power.
+        </p>
+      </article>
+      <article class="card" data-reveal>
+        <p class="label label--red">Why open tools</p>
+        <p>
+          Commercial chip-design tools and process kits need licences most readers cannot get. With an open process
+          kit and open tools, anyone can rerun our designs from the source.
+        </p>
+      </article>
+    </div>
+  </section>
+
+  <section class="section t-graphite" id="flow">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">Our flow</p>
+          <h2>RTL to layout with open tools</h2>
+        </div>
+        <p class="lede">Every design we publish goes through these steps, and every intermediate file is in the repository.</p>
+      </div>
+      <ol class="flow">
+        {
+          flow.map(([step, tool, text], i) => (
+            <li data-reveal>
+              <span class="label label--red">{String(i + 1).padStart(2, "0")} · {tool}</span>
+              <h3>{step}</h3>
+              <p>{text}</p>
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section" id="models">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">3D interactive</p>
+          <h2>Semiconductors on a real board</h2>
+        </div>
+        <p class="lede">
+          An example of how semiconductors power real electronic systems. Explore this Arduino board to see how
+          several semiconductor components work together: a microcontroller, voltage regulators, memory and discrete
+          transistors.
+        </p>
+      </div>
+      <div class="models">
+        <ModelEmbed id="5e4c4717393e4431890a0e40d0482aa3" title="Arduino Uno board" />
+        <ModelEmbed id="f31feafc5e9743abbdf33c54f9d92669" title="Arduino Uno board, alternative model" />
+      </div>
+      <aside class="uno-q card" data-reveal>
+        <p class="label label--red">Arduino ecosystem · UNO Q</p>
+        <p>
+          Arduino describes the UNO Q, developed with Qualcomm, as pairing two processors on one board: an STM32
+          microcontroller for real-time control and sensors, and a Qualcomm QRB2210 processor that runs Linux and can
+          handle AI and computer-vision workloads. It keeps compatibility with classic Arduino shields and adds
+          Wi-Fi and Bluetooth, with Python and C/C++ support.
+        </p>
+        <p class="src label">Source: <a href="https://www.arduino.cc" rel="noopener">arduino.cc</a></p>
+      </aside>
+    </div>
+  </section>
+
+  <section class="section t-concrete" id="journey">
+    <div class="wrap">
+      <div class="section-head" data-reveal>
+        <p class="label">From sand to chip</p>
+        <h2>How a chip is made</h2>
+      </div>
+      <div class="journey">
+        {
+          journey.map((j, i) => (
+            <article id={j.id} data-reveal>
+              <span class="num">{String(i + 1).padStart(2, "0")}</span>
+              <h3>{j.title}</h3>
+              {j.body.map((p) => <p>{p}</p>)}
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="topics">
+    <div class="wrap two-col">
+      <div class="section-head" data-reveal>
+        <p class="label">Topics we cover</p>
+        <h2>Research areas and industry trends</h2>
+      </div>
+      <div class="topics" data-reveal>
+        <div>
+          <p class="label label--red">Core areas</p>
+          <ul>
+            <li>Advanced transistor architectures</li>
+            <li>Leading-edge fabrication processes</li>
+            <li>New semiconductor materials</li>
+            <li>Energy-efficient computing and low-voltage design</li>
+          </ul>
+        </div>
+        <div>
+          <p class="label label--red">Trends we follow</p>
+          <ul>
+            <li>Chiplet-based design</li>
+            <li>AI and machine-learning accelerators</li>
+            <li>Heterogeneous integration</li>
+            <li>Open-source silicon and open process kits</li>
+          </ul>
+        </div>
+        <p class="muted tools">Tools: {semi.tools.join(" · ")}</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  .page-head h1 {
+    max-width: 16ch;
+  }
+
+  .jump {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem 1.5rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    margin-top: 0.5rem;
+  }
+
+  .jump a {
+    text-decoration: none;
+    color: var(--ink-2);
+  }
+
+  .jump a:hover {
+    color: var(--red);
+  }
+
+  .basics {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .basics article {
+    display: grid;
+    align-content: start;
+    gap: 0.85rem;
+    padding: 1.6rem;
+  }
+
+  .basics p:last-child {
+    font-family: var(--serif);
+    font-size: 1.25rem;
+    line-height: 1.4;
+  }
+
+  .flow {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    border-top: 1px solid var(--ink);
+  }
+
+  .flow li {
+    display: grid;
+    align-content: start;
+    gap: 0.6rem;
+    padding: 1.4rem 1.2rem 1.4rem 0;
+  }
+
+  .flow li + li {
+    border-left: 1px solid var(--rule);
+    padding-left: 1.2rem;
+  }
+
+  .flow h3 {
+    font-size: 1.4rem;
+  }
+
+  .flow p {
+    color: var(--ink-2);
+    font-size: 0.95rem;
+  }
+
+  .models {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+  }
+
+  .uno-q {
+    display: grid;
+    gap: 0.85rem;
+    padding: 1.6rem;
+    margin-top: 2rem;
+    max-width: 52rem;
+  }
+
+  .uno-q p:nth-child(2) {
+    color: var(--ink-2);
+  }
+
+  .src a {
+    color: var(--red);
+  }
+
+  .journey {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+  }
+
+  .journey article {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    border-top: 2px solid var(--ink);
+    padding-top: 1.2rem;
+    scroll-margin-top: 5rem;
+  }
+
+  .num {
+    font-family: var(--mono);
+    font-size: 1.4rem;
+    color: var(--red);
+  }
+
+  .journey h3 {
+    font-size: 1.6rem;
+  }
+
+  .journey p {
+    color: var(--ink-2);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1.6fr;
+    gap: clamp(2rem, 5vw, 4rem);
+  }
+
+  .topics {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+  }
+
+  .topics ul {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--ink);
+  }
+
+  .topics li {
+    padding-block: 0.7rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .tools {
+    grid-column: 1 / -1;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+  }
+
+  @media (max-width: 64rem) {
+    .flow {
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .flow li,
+    .flow li + li {
+      border-left: 0;
+      padding: 1.2rem 0;
+      border-bottom: 1px solid var(--rule);
+    }
+  }
+
+  @media (max-width: 56rem) {
+    .basics,
+    .models,
+    .journey,
+    .two-col,
+    .topics {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  @media (max-width: 36rem) {
+    .flow {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

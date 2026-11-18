@@ -1,0 +1,26 @@
+---
+import Base from "../layouts/Base.astro";
+---
+
+<Base title="Page not found" description="This page does not exist on neurotitan.in." noindex>
+  <section class="wrap notfound">
+    <p class="label label--red">404</p>
+    <h1>No page at this address</h1>
+    <p class="lede">
+      The link may be old: the site was rebuilt in November 2026. Try the <a href="/">home page</a>, the
+      <a href="/research">research areas</a> or the <a href="/blog">blog</a>.
+    </p>
+  </section>
+</Base>
+
+<style>
+  .notfound {
+    display: grid;
+    gap: 1.25rem;
+    padding-block: clamp(4rem, 12vw, 9rem);
+  }
+
+  h1 {
+    font-size: clamp(2.25rem, 5vw, 3.5rem);
+  }
+</style>

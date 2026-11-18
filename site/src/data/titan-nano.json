@@ -1,0 +1,170 @@
+{
+ "name": "Titan-nano",
+ "version": "v1",
+ "params": 1847424,
+ "config": {
+  "vocab_size": 96,
+  "ctx": 256,
+  "n_layer": 4,
+  "n_head": 4,
+  "d_model": 192,
+  "dropout": 0.1
+ },
+ "train": {
+  "steps": 2200,
+  "bs": 32,
+  "lr": 0.001,
+  "seed": 1337
+ },
+ "torch": "2.11.0+cpu",
+ "threads": 24,
+ "train_seconds": 2529.7,
+ "data": {
+  "source": "Python 3.13.5 standard library (.py files, test suites excluded)",
+  "licence": "Python Software Foundation License",
+  "files": {
+   "train": 634,
+   "val": 38,
+   "test": 24
+  },
+  "chars": {
+   "train": 10393363,
+   "val": 886801,
+   "test": 376897
+  }
+ },
+ "test": {
+  "float32": {
+   "bpc": 1.3843943689932088,
+   "accuracy": 0.733507386653082,
+   "chars": 376896
+  },
+  "int8": {
+   "bpc": 1.3846806880919555,
+   "accuracy": 0.7333322720326032,
+   "chars": 376896
+  }
+ },
+ "baselines": {
+  "method": "character n-gram, Witten-Bell interpolation, add-one unigram base",
+  "val_bpc_by_order": {
+   "0": 4.7182,
+   "1": 3.5382,
+   "2": 2.6081,
+   "3": 2.0485,
+   "4": 1.8632,
+   "5": 1.8395,
+   "6": 1.8516,
+   "7": 1.8958
+  },
+  "best_order_on_val": 5,
+  "test_bpc_best_order": 1.5813,
+  "test_bpc_unigram": 4.7734,
+  "uniform_bpc": 6.585
+ },
+ "weights_bytes": 1907584,
+ "greedy_examples": [
+  {
+   "prompt": "def __init__(self",
+   "greedy": ", filename, filename, filename, filename, filename, filename"
+  },
+  {
+   "prompt": "import os\nimport sys\n\n\ndef main():\n    ",
+   "greedy": " \"\"\"Return the main the main the main the maint the mainatio"
+  },
+  {
+   "prompt": "    for i in range(len(",
+   "greedy": "len(len(len(len(len(len,len(len,len,len,len,len,len,len,len,"
+  }
+ ],
+ "samples": [
+  {
+   "prompt": "class Stack:\n    def __init__(self):\n        ",
+   "completion": "  return self.__init__(self, self.__init__)\n\n    def _context(self, self, self):\n            self.__context = self._context.__context__\n            self._contex",
+   "temperature": 0.5,
+   "seed": 0,
+   "top_k": 8
+  },
+  {
+   "prompt": "def read_config(path):\n    ",
+   "completion": "                                                                                                                                                                ",
+   "temperature": 0.5,
+   "seed": 0,
+   "top_k": 8
+  }
+ ],
+ "curve": [
+  {
+   "step": 0,
+   "train_bpc": 6.2828,
+   "val_bpc": 6.2088,
+   "seconds": 3.1
+  },
+  {
+   "step": 200,
+   "train_bpc": 3.5573,
+   "val_bpc": 3.3345,
+   "seconds": 753.4
+  },
+  {
+   "step": 400,
+   "train_bpc": 3.106,
+   "val_bpc": 2.9072,
+   "seconds": 938.1
+  },
+  {
+   "step": 600,
+   "train_bpc": 2.8043,
+   "val_bpc": 2.6266,
+   "seconds": 1112.1
+  },
+  {
+   "step": 800,
+   "train_bpc": 2.5829,
+   "val_bpc": 2.3965,
+   "seconds": 1287.2
+  },
+  {
+   "step": 1000,
+   "train_bpc": 2.4076,
+   "val_bpc": 2.2269,
+   "seconds": 1466.4
+  },
+  {
+   "step": 1200,
+   "train_bpc": 2.2503,
+   "val_bpc": 2.0593,
+   "seconds": 1644.7
+  },
+  {
+   "step": 1400,
+   "train_bpc": 2.128,
+   "val_bpc": 1.9264,
+   "seconds": 1821.7
+  },
+  {
+   "step": 1600,
+   "train_bpc": 2.0046,
+   "val_bpc": 1.8218,
+   "seconds": 1999.4
+  },
+  {
+   "step": 1800,
+   "train_bpc": 1.9308,
+   "val_bpc": 1.7581,
+   "seconds": 2176.5
+  },
+  {
+   "step": 2000,
+   "train_bpc": 1.8905,
+   "val_bpc": 1.7125,
+   "seconds": 2353.0
+  },
+  {
+   "step": 2200,
+   "train_bpc": 1.8485,
+   "val_bpc": 1.6867,
+   "seconds": 2529.7
+  }
+ ]
+}

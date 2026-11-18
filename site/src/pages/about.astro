@@ -1,0 +1,159 @@
+---
+import Base from "../layouts/Base.astro";
+import { CAMPUS_AMBASSADOR_FORM, PILLARS, PRINCIPLES, SITE } from "../data/site";
+---
+
+<Base
+  title="About"
+  description="What NeuroTitan Labs stands for, the standards every result is held to, and how to reach us."
+>
+  <section class="t-graphite page-hero">
+    <div class="wrap page-head">
+    <p class="label label--red">About</p>
+    <h1 class="display">A small lab that shows its work.</h1>
+    <p class="lede">
+      NeuroTitan Labs is an independent research lab working across machine learning, chip design and quantum
+      computing. We publish experiments, reproductions and designs, each with the code and data behind it.
+    </p>
+    </div>
+  </section>
+
+  <section class="section dots">
+    <div class="wrap">
+      <div class="pillars">
+        {
+          PILLARS.map((p, i) => (
+            <article class="card" data-reveal>
+              <span class="label label--red">{String(i + 1).padStart(2, "0")}</span>
+              <h2>{p.title}</h2>
+              <p>{p.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap two-col">
+      <div class="section-head">
+        <p class="label">Standards</p>
+        <h2>What every result is held to</h2>
+      </div>
+      <ol class="standards">
+        {
+          PRINCIPLES.map((p) => (
+            <li>
+              <strong>{p.title}.</strong> {p.body}
+            </li>
+          ))
+        }
+      </ol>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap two-col">
+      <div class="section-head">
+        <p class="label">Contact</p>
+        <h2>Get in touch</h2>
+      </div>
+      <div class="contact">
+        <p>
+          Questions about a post, a correction, or a collaboration: <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+          If you find an error in something we published, tell us and we will correct the post and say what changed.
+        </p>
+        <p>
+          Code: <a href={SITE.github} rel="noopener">github.com/NeuroTitan-Hub</a>.
+        </p>
+        <p>
+          Students who want to represent the lab on campus can apply through the <a
+            href={CAMPUS_AMBASSADOR_FORM}
+            rel="noopener">campus ambassador form</a
+          >.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .page-hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .pillars article {
+    display: grid;
+    gap: 0.7rem;
+    align-content: start;
+    padding: 1.6rem;
+  }
+
+  .pillars h2 {
+    font-size: 1.7rem;
+  }
+
+  .pillars p {
+    color: var(--ink-2);
+  }
+
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 2fr;
+    gap: clamp(1.5rem, 5vw, 4rem);
+  }
+
+  .standards {
+    margin: 0;
+    padding-left: 1.25rem;
+    display: grid;
+    gap: 1rem;
+    max-width: var(--measure);
+    color: var(--ink-2);
+  }
+
+  .standards strong {
+    color: var(--ink);
+  }
+
+  .standards li::marker {
+    color: var(--red);
+    font-family: var(--mono);
+  }
+
+  .contact {
+    display: grid;
+    gap: 1rem;
+    max-width: var(--measure);
+  }
+
+  .contact a {
+    overflow-wrap: anywhere;
+  }
+
+  .visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+  }
+
+  @media (max-width: 56rem) {
+    .pillars,
+    .two-col {
+      grid-template-columns: 1fr;
+    }
+  }
+
+</style>

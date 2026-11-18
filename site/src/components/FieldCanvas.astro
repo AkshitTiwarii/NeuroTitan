@@ -1,0 +1,294 @@
+---
+/**
+ * Hero visual: one point cloud that morphs between the lab's three fields.
+ *   network: four layers of a neural network
+ *   wafer:   dies on a circular silicon wafer
+ *   sphere:  a Bloch sphere with its equator and axes
+ * Pure canvas 2D with a hand-written 3D projection; no libraries.
+ * Pauses when off-screen or the tab is hidden; draws one still frame under
+ * prefers-reduced-motion. Decorative, so it is hidden from assistive tech.
+ */
+interface Props {
+  caption?: boolean;
+}
+const { caption = true } = Astro.props;
+---
+
+<figure class="field-canvas" data-field-canvas>
+  <canvas aria-hidden="true"></canvas>
+  {
+    caption && (
+      <figcaption class="label">
+        <span class="dot" />
+        <span data-shape-name>Neural network</span>
+      </figcaption>
+    )
+  }
+</figure>
+
+<script>
+  type V3 = [number, number, number];
+  const N = 640;
+  const TAU = Math.PI * 2;
+
+  // Deterministic PRNG so the picture is the same on every visit.
+  function rng(seed: number) {
+    return () => {
+      seed = (seed * 1664525 + 1013904223) >>> 0;
+      return seed / 4294967296;
+    };
+  }
+
+  // Neural network: node centres per layer, and points forming a ring around each node.
+  const LAYERS = [4, 6, 6, 3];
+  const NODES: V3[] = [];
+  LAYERS.forEach((n, li) => {
+    for (let k = 0; k < n; k++) {
+      const x = -1.05 + (li / (LAYERS.length - 1)) * 2.1;
+      const y = n === 1 ? 0 : -0.8 + (k / (n - 1)) * 1.6;
+      NODES.push([x, y, 0]);
+    }
+  });
+  const EDGES: [number, number][] = [];
+  {
+    let offset = 0;
+    for (let li = 0; li < LAYERS.length - 1; li++) {
+      const next = offset + LAYERS[li];
+      for (let a = 0; a < LAYERS[li]; a++)
+        for (let b = 0; b < LAYERS[li + 1]; b++) EDGES.push([offset + a, next + b]);
+      offset = next;
+    }
+  }
+
+  function networkShape(): V3[] {
+    const r = rng(7);
+    const pts: V3[] = [];
+    for (let i = 0; i < N; i++) {
+      const c = NODES[i % NODES.length];
+      const a = r() * TAU;
+      const rad = 0.075 + (r() - 0.5) * 0.012;
+      pts.push([c[0] + Math.cos(a) * rad, c[1] + Math.sin(a) * rad, c[2] + (r() - 0.5) * 0.03]);
+    }
+    return pts;
+  }
+
+  // Silicon wafer: the wafer edge (with its orientation notch) and the die grid.
+  function waferShape(): V3[] {
+    const r = rng(11);
+    const pts: V3[] = [];
+    const R = 1.05;
+    const die = 0.26;
+    const lines = Math.floor(R / die);
+    while (pts.length < N) {
+      if (r() < 0.28) {
+        const a = r() * TAU;
+        // notch at the bottom of the wafer
+        if (Math.abs(a - Math.PI / 2) < 0.06) continue;
+        pts.push([Math.cos(a) * R, 0, Math.sin(a) * R]);
+        continue;
+      }
+      const k = (Math.floor(r() * (2 * lines + 1)) - lines) * die;
+      const along = (r() * 2 - 1) * R;
+      const [x, z] = r() < 0.5 ? [k, along] : [along, k];
+      if (x * x + z * z > (R - 0.05) * (R - 0.05)) continue;
+      pts.push([x, 0, z]);
+    }
+    return pts;
+  }
+
+  function sphereShape(): V3[] {
+    const r = rng(23);
+    const pts: V3[] = [];
+    for (let i = 0; i < N; i++) {
+      const u = r();
+      if (u < 0.55) {
+        // surface (Fibonacci-ish random)
+        const t = Math.acos(1 - 2 * r());
+        const p = r() * TAU;
+        pts.push([Math.sin(t) * Math.cos(p), Math.cos(t), Math.sin(t) * Math.sin(p)]);
+      } else if (u < 0.8) {
+        const p = r() * TAU; // equator
+        pts.push([Math.cos(p), 0, Math.sin(p)]);
+      } else if (u < 0.9) {
+        pts.push([0, r() * 2 - 1, 0]); // z axis
+      } else {
+        const p = r() * TAU; // meridian
+        pts.push([Math.cos(p), Math.sin(p), 0]);
+      }
+    }
+    return pts;
+  }
+
+  const SHAPES = [
+    { name: "Neural network", pts: networkShape(), tilt: 0.12 },
+    { name: "Silicon wafer", pts: waferShape(), tilt: 0.75 },
+    { name: "Bloch sphere", pts: sphereShape(), tilt: 0.35 },
+  ];
+
+  const ease = (t: number) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+
+  function init(fig: HTMLElement) {
+    const canvas = fig.querySelector("canvas")!;
+    const ctx = canvas.getContext("2d")!;
+    const label = fig.querySelector<HTMLElement>("[data-shape-name]");
+    const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const style = getComputedStyle(fig);
+    const ink = style.getPropertyValue("--ink").trim() || "#ece8e1";
+    const red = style.getPropertyValue("--red").trim() || "#e5574e";
+    const accent = new Set(Array.from({ length: 26 }, (_, i) => (i * 97) % N));
+
+    let w = 0, h = 0, dpr = 1;
+    function resize() {
+      dpr = Math.min(devicePixelRatio || 1, 2);
+      const rect = canvas.getBoundingClientRect();
+      w = rect.width;
+      h = rect.height;
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    new ResizeObserver(resize).observe(canvas);
+
+    let mx = 0, my = 0;
+    fig.addEventListener("pointermove", (e) => {
+      const r = canvas.getBoundingClientRect();
+      mx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+      my = ((e.clientY - r.top) / r.height - 0.5) * 2;
+    });
+    fig.addEventListener("pointerleave", () => { mx = 0; my = 0; });
+
+    const HOLD = 4200, MORPH = 1800, CYCLE = HOLD + MORPH;
+    let start = performance.now();
+    let running = false;
+    let raf = 0;
+    let lastIdx = -1;
+    const cur: V3[] = SHAPES[0].pts.map((p) => [...p] as V3);
+
+    function frame(now: number) {
+      // rAF timestamps can be slightly earlier than performance.now(); never let t go negative.
+      const t = Math.max(0, now - start);
+      const idx = Math.floor(t / CYCLE) % SHAPES.length;
+      const local = t % CYCLE;
+      const from = SHAPES[idx];
+      const to = SHAPES[(idx + 1) % SHAPES.length];
+      const k = local < HOLD ? 0 : ease((local - HOLD) / MORPH);
+      const shown = k < 0.5 ? from : to;
+      if (label && shown !== SHAPES[lastIdx]) {
+        lastIdx = SHAPES.indexOf(shown);
+        label.textContent = shown.name;
+      }
+      for (let i = 0; i < N; i++) {
+        const a = from.pts[i], b = to.pts[i];
+        cur[i][0] = a[0] + (b[0] - a[0]) * k;
+        cur[i][1] = a[1] + (b[1] - a[1]) * k;
+        cur[i][2] = a[2] + (b[2] - a[2]) * k;
+      }
+      const tilt = from.tilt + (to.tilt - from.tilt) * k + my * 0.15;
+      const yaw = t * 0.00018 + mx * 0.35;
+      const net = (idx === 0 ? 1 - k : 0) + ((idx + 1) % SHAPES.length === 0 ? k : 0);
+      draw(yaw, tilt, net);
+      if (running && !reduce) raf = requestAnimationFrame(frame);
+    }
+
+    function draw(yaw: number, tilt: number, net: number) {
+      ctx.clearRect(0, 0, w, h);
+      const cy = Math.cos(yaw), sy = Math.sin(yaw);
+      const ct = Math.cos(tilt), st = Math.sin(tilt);
+      const scale = Math.min(w, h) * 0.38;
+      const cx0 = w / 2, cy0 = h / 2;
+      const project = (x: number, y: number, z: number) => {
+        const x1 = x * cy + z * sy;
+        const z1 = -x * sy + z * cy;
+        const y2 = y * ct - z1 * st;
+        const z2 = y * st + z1 * ct;
+        const persp = 2.6 / (2.6 + z2);
+        return [cx0 + x1 * scale * persp, cy0 + y2 * scale * persp] as const;
+      };
+      if (net > 0.02) {
+        ctx.strokeStyle = ink;
+        ctx.lineWidth = 0.6;
+        ctx.globalAlpha = 0.16 * net;
+        ctx.beginPath();
+        for (const [a, b] of EDGES) {
+          const [ax, ay] = project(...NODES[a]);
+          const [bx, by] = project(...NODES[b]);
+          ctx.moveTo(ax, ay);
+          ctx.lineTo(bx, by);
+        }
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+      }
+      for (let i = 0; i < N; i++) {
+        const [x, y, z] = cur[i];
+        const x1 = x * cy + z * sy;
+        const z1 = -x * sy + z * cy;
+        const y2 = y * ct - z1 * st;
+        const z2 = y * st + z1 * ct;
+        const persp = 2.6 / (2.6 + z2);
+        const px = cx0 + x1 * scale * persp;
+        const py = cy0 + y2 * scale * persp;
+        const depth = Math.max(0.12, Math.min(1, 0.55 - z2 * 0.45));
+        const isAccent = accent.has(i);
+        ctx.globalAlpha = isAccent ? Math.min(1, depth + 0.3) : depth * 0.85;
+        ctx.fillStyle = isAccent ? red : ink;
+        const s = (isAccent ? 2.6 : 1.5) * persp;
+        ctx.fillRect(px - s / 2, py - s / 2, s, s);
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    function play() {
+      if (running || reduce) return;
+      running = true;
+      raf = requestAnimationFrame(frame);
+    }
+    function stop() {
+      running = false;
+      cancelAnimationFrame(raf);
+    }
+
+    if (reduce) {
+      requestAnimationFrame(() => frame(start));
+      new ResizeObserver(() => frame(start)).observe(canvas);
+      return;
+    }
+    // Start now if on screen; the observer only pauses and resumes it.
+    const r0 = fig.getBoundingClientRect();
+    if (r0.bottom > 0 && r0.top < innerHeight) play();
+    new IntersectionObserver(([e]) => (e.isIntersecting ? play() : stop())).observe(fig);
+    document.addEventListener("visibilitychange", () => (document.hidden ? stop() : play()));
+  }
+
+  document.querySelectorAll<HTMLElement>("[data-field-canvas]").forEach(init);
+</script>
+
+<style>
+  .field-canvas {
+    position: relative;
+    margin: 0;
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    max-height: 34rem;
+  }
+
+  canvas {
+    width: 100%;
+    height: 100%;
+  }
+
+  figcaption {
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .dot {
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--red);
+  }
+</style>
