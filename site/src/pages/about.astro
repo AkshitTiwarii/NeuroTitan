@@ -1,11 +1,11 @@
 ---
 import Base from "../layouts/Base.astro";
-import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PILLARS, PRINCIPLES, SITE } from "../data/site";
+import { CAMPUS_AMBASSADOR_FORM, PILLARS, PRINCIPLES, SITE } from "../data/site";
 ---
 
 <Base
   title="About"
-  description="Who runs NeuroTitan Labs, the standards every result is held to, and how to reach us."
+  description="What NeuroTitan Labs stands for, the standards every result is held to, and how to reach us."
 >
   <section class="t-graphite page-hero">
     <div class="wrap page-head">
@@ -31,28 +31,6 @@ import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PILLARS, PRINCIPLES, SITE } from "../da
           ))
         }
       </div>
-    </div>
-  </section>
-
-  <section class="section">
-    <div class="wrap two-col">
-      <div class="section-head">
-        <p class="label">People</p>
-        <h2>Who runs the lab</h2>
-      </div>
-      <ul class="people">
-        {
-          PEOPLE.map((p) => (
-            <li>
-              <span class="person">{p.name}</span>
-              <span class="label">{p.role}</span>
-              <a href={p.github} rel="noopener">
-                GitHub<span class="visually-hidden"> profile of {p.name}</span>
-              </a>
-            </li>
-          ))
-        }
-      </ul>
     </div>
   </section>
 
@@ -134,27 +112,6 @@ import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PILLARS, PRINCIPLES, SITE } from "../da
     gap: clamp(1.5rem, 5vw, 4rem);
   }
 
-  .people {
-    list-style: none;
-    margin: 0;
-    padding: 0;
-    border-top: 1px solid var(--ink);
-  }
-
-  .people li {
-    display: grid;
-    grid-template-columns: 1.5fr 1fr auto;
-    align-items: baseline;
-    gap: 1rem;
-    padding-block: 1rem;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .person {
-    font-family: var(--serif);
-    font-size: 1.375rem;
-  }
-
   .standards {
     margin: 0;
     padding-left: 1.25rem;
@@ -199,13 +156,4 @@ import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PILLARS, PRINCIPLES, SITE } from "../da
     }
   }
 
-  @media (max-width: 30rem) {
-    .people li {
-      grid-template-columns: 1fr auto;
-    }
-
-    .people .label {
-      grid-row: 2;
-    }
-  }
 </style>

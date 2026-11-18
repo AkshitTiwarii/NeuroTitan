@@ -195,11 +195,10 @@ export const TOOLS = [
   "Magic VLSI", "ngspice", "SkyWater sky130", "Verilog", "Icarus Verilog", "OpenCV", "ESP32",
 ] as const;
 
-export const PEOPLE = [
-  { name: "Satyabrat Sahu", role: "Founder", github: "https://github.com/Satyabrat2005" },
-  { name: "Kartik Bhardwaj", role: "Co-founder", github: "https://github.com/kartik1446" },
-  { name: "Ashutosh Rath", role: "Co-founder", github: "https://github.com/GitGudScrubss" },
-] as const;
+/*
+ * No team list: the live site's team section was deliberately hidden on 2026-11-01
+ * (AkshitTiwarii/NeuroTitan commit 040d19e). Add people back only when gg says so.
+ */
 
 export const CAMPUS_AMBASSADOR_FORM =
   "https://docs.google.com/forms/d/e/1FAIpQLSdbtblF3w5Nqnckn_gW1zs3ybf24725lcJaZOKR54gunskXcg/viewform";
