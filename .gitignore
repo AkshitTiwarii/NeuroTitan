@@ -79,3 +79,11 @@ agenthub/agents/youtube/db
 # Mobile development
 android-sdk/ frontend/node_modules/.cache/default-development/0.pack
 frontend/node_modules/.cache/default-development/0.pack
+
+# Astro
+site/.astro/
+site/dist/
+
+# Local env files, never committed
+.env
+.env.*

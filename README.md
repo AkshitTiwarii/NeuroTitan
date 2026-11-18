@@ -1,120 +1,51 @@
-# NeuroTitan - Advanced AI Research Platform-
+# neurotitan.in
 
-Building the future of artificial intelligence through open research, collaborative innovation, and cutting-edge technology.
+The website of NeuroTitan Labs: a static site built with [Astro](https://astro.build) and deployed on Vercel.
 
-## 🚀 Features
-
-- **Premium Dark Theme** - Monochromatic design with smooth animations
-- **Interactive 3D Elements** - Spline 3D animations for engaging user experience
-- **Scroll-Based Animations** - Framer Motion powered smooth reveals
-- **Mouse Tracking Effects** - Interactive glow effects that follow cursor
-- **Responsive Design** - Optimized for all device sizes
-- **Fast Performance** - Optimized React components with lazy loading
-
-## 🛠️ Tech Stack
-
-- **Frontend**: React 19, Framer Motion, Tailwind CSS
-- **UI Components**: Radix UI, shadcn/ui
-- **3D Graphics**: Spline
-- **Backend**: Python Flask (in `/backend`)
-- **Deployment**: Vercel
-
-## 📦 Installation
-
-### Prerequisites
-- Node.js 16+ and npm/yarn
-- Python 3.8+ (for backend)
-
-### Frontend Setup
+## Run it
 
 ```bash
-cd frontend
-npm install
-npm start
+cd site
+npm ci
+npm run dev        # http://localhost:4321
+npm run build      # type-checks, then writes static HTML to site/dist
+npm run preview    # serves site/dist
 ```
 
-The app will run on `http://localhost:3000`
+Node 20.3 or newer.
 
-### Backend Setup
+## Layout
 
-```bash
-cd backend
-pip install -r requirements.txt
-python server.py
-```
+| Path | What it is |
+|---|---|
+| `site/src/pages/` | One file per route: `/`, `/research`, `/blog`, `/blog/<slug>`, `/about`, `/privacy`, `404`, `rss.xml`, `robots.txt` |
+| `site/src/content/blog/` | Blog posts, one Markdown file each (see below) |
+| `site/src/data/site.ts` | Site facts: fields, people, projects, contact. Every line must be true and checkable |
+| `site/src/styles/global.css` | Design tokens (paper, ink, grey, one red accent) and base styles |
+| `site/public/analytics.js` | GA4 and PostHog, loaded after page load, session recording off, skipped under Do Not Track / GPC |
+| `site/scripts/make_images.py` | Regenerates favicon.ico, apple-touch-icon.png and og-default.png |
+| `vercel.json` | Build settings, security headers, the `/semiconductor` redirect |
 
-## 🌐 Deployment to Vercel
+## Adding a blog post
 
-### Quick Deploy
+Create `site/src/content/blog/<slug>.md`:
 
-1. **Push to GitHub** (already configured)
-2. **Import to Vercel**:
-   - Go to [vercel.com](https://vercel.com)
-   - Click "New Project"
-   - Import your `NuroTitan` repository
-   - Vercel will auto-detect the configuration from `vercel.json`
-   - Click "Deploy"
-
-### Manual Configuration (if needed)
-
-- **Framework Preset**: Create React App
-- **Build Command**: `cd frontend && npm run build`
-- **Output Directory**: `frontend/build`
-- **Install Command**: `cd frontend && npm install`
-
-### Environment Variables
-
-No environment variables required for frontend deployment.
-
-## 📁 Project Structure
-
-```
-NuroTitan/
-├── frontend/           # React frontend application
-│   ├── src/
-│   │   ├── components/ # React components
-│   │   ├── pages/      # Page components
-│   │   └── hooks/      # Custom React hooks
-│   ├── public/         # Static assets
-│   └── package.json
-├── backend/            # Python Flask backend
-│   ├── server.py
-│   └── requirements.txt
-└── vercel.json        # Vercel deployment config
-```
-
-## 👥 Team
-
-**Founder**
-- [Satyabrat Sahu](https://github.com/Satyabrat2005)
-
-**Co-Founders**
-- [Kartik Bhardwaj](https://github.com/kartik1446)
-- [Ashutosh Rath](https://github.com/GitGudScrubss)
-
-**Developers**
-- [Akshit Tiwari](https://github.com/AkshitTiwarii)
-- [Rajan Jha](https://github.com/Rajan167030)
-
-## 🔗 Links
-
-- **GitHub Organization**: [NeuroTitan-Hub](https://github.com/NeuroTitan-Hub)
-- **Email**: neurotitancontact@gmail.com
-
-## 📄 License
-
-© 2024 NeuroTitan. All rights reserved.
-
-## 🎨 Design Features
-
-- Monochromatic color scheme (#000000, #FFFFFF, grays)
-- Custom easing curves: `[0.22, 1, 0.36, 1]`
-- Typography: Space Grotesk (headings), Montserrat (body)
-- Smooth scroll-triggered animations
-- Interactive hover effects
-- 3D flip cards in Ecosystem section
-- Mouse-tracking glow effects
-
+```markdown
+---
+title: "Under 90 characters"
+description: "50 to 160 characters. Used for search results and link previews."
+field: AI            # AI | Semiconductors | Quantum
+date: 2026-11-28
+authors: ["Name One", "Name Two"]
+repo: https://github.com/NeuroTitan-Hub/<repo>   # code and data behind the post; null only on purpose
+draft: true          # drafts show in `npm run dev`, never in a build
 ---
 
-Built with precision and passion by the NeuroTitan team.
+Post body in Markdown.
+```
+
+The build fails if the frontmatter breaks these rules. Each post gets its own title, description, canonical URL, Open Graph tags and JSON-LD, and appears in `/rss.xml` and the sitemap.
+
+## Deploys
+
+Vercel builds every push. Pull requests get a preview URL; merging to `main` deploys to neurotitan.in. Changes reach `main` only through a reviewed pull request.

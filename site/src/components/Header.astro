@@ -1,0 +1,94 @@
+---
+import { NAV } from "../data/site";
+import Mark from "./Mark.astro";
+
+const path = Astro.url.pathname.replace(/\/$/, "");
+const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
+---
+
+<header class="site-header">
+  <div class="wrap bar">
+    <a class="brand" href="/" aria-label="NeuroTitan Labs, home">
+      <Mark size={22} />
+      <span class="brand-name">NeuroTitan<span class="brand-labs">Labs</span></span>
+    </a>
+    <nav aria-label="Main">
+      <ul>
+        {
+          NAV.map((item) => (
+            <li>
+              <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+                {item.label}
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    min-height: 4rem;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    text-decoration: none;
+    color: var(--ink);
+  }
+
+  .brand-name {
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  .brand-labs {
+    color: var(--grey);
+    margin-left: 0.5em;
+  }
+
+  ul {
+    display: flex;
+    gap: clamp(1rem, 3vw, 2rem);
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  nav a {
+    font-size: 0.9375rem;
+    text-decoration: none;
+    color: var(--ink-2);
+    padding-block: 0.5rem;
+  }
+
+  nav a:hover,
+  nav a[aria-current="page"] {
+    color: var(--ink);
+    text-decoration: underline;
+    text-decoration-color: var(--red);
+    text-decoration-thickness: 2px;
+    text-underline-offset: 0.45em;
+  }
+
+  @media (max-width: 30rem) {
+    .brand-labs {
+      display: none;
+    }
+  }
+</style>
