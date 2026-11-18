@@ -6,11 +6,15 @@ import PostList from "../components/PostList.astro";
 import { FIELDS, PILLARS, PRINCIPLES, PRODUCTS, SITE, TOOLS, CAMPUS_AMBASSADOR_FORM } from "../data/site";
 import { getPublishedPosts } from "../lib/posts";
 import { getOrgStats } from "../lib/github";
+import titan from "../data/titan-nano.json";
 
 const allPosts = await getPublishedPosts();
 const posts = allPosts.slice(0, 3);
 const stats = await getOrgStats();
 const featured = PRODUCTS.slice(0, 4);
+const sample = titan.samples[0];
+const gainPct = ((1 - titan.test.int8.bpc / titan.baselines.test_bpc_best_order) * 100).toFixed(0);
+const titanParams = (titan.params / 1e6).toFixed(1);
 ---
 
 <Base>
@@ -70,25 +74,20 @@ const featured = PRODUCTS.slice(0, 4);
     <div class="wrap ai-grid">
       <div data-reveal>
         <p class="label">02 · NeuroTitan AI</p>
-        <h2>See how a language model reads</h2>
+        <h2>Titan-nano: our first model, built from scratch</h2>
         <p class="lede">
-          Before a model can think about your sentence, a tokenizer cuts it into pieces. The same sentence often costs
-          more pieces in Hindi or Odia than in English. Try it live: it runs in your browser and nothing
-          is sent anywhere.
+          A {titanParams}-million-parameter transformer we designed and trained in-house on Python code. On code it never
+          saw, it needs {gainPct}% fewer bits per character than the best classical model. It runs in your browser on our
+          own inference engine, and you can watch its real attention as it writes.
         </p>
         <div class="actions">
-          <a class="button" href="/ai#playground">Open the tokenizer</a>
-          <a class="button button--ghost" href="/ai">How LLMs work</a>
+          <a class="button" href="/ai#demo">Try Titan-nano</a>
+          <a class="button button--ghost" href="/ai#results">See the results</a>
         </div>
       </div>
-      <div class="console" data-reveal aria-label="Example of tokenizer output">
-        <div class="console-bar"><i></i><i></i><i></i><span>tokenizer · o200k_base</span></div>
-        <div class="console-body">
-          <p><span class="prompt">›</span> encode("Language models read tokens")</p>
-          <p class="out">["Language", " models", " read", " tokens"]  <span class="label">4 tokens</span></p>
-          <p><span class="prompt">›</span> encode("भाषा मॉडल टोकन")</p>
-          <p class="out">["भ", "ाष", "ा", " मॉडल", " ट", "ोक", "न"]  <span class="label">7 tokens</span></p>
-        </div>
+      <div class="console" data-reveal aria-label="A real completion from Titan-nano">
+        <div class="console-bar"><i></i><i></i><i></i><span>titan-nano · unedited sample · temperature {sample.temperature} · seed {sample.seed}</span></div>
+        <pre class="console-body sample"><span class="prompt-text">{sample.prompt}</span><span class="gen">{sample.completion}</span></pre>
       </div>
     </div>
   </section>
@@ -322,12 +321,19 @@ const featured = PRODUCTS.slice(0, 4);
     box-shadow: 8px 8px 0 #000;
   }
 
-  .console-body p + p {
-    margin-top: 0.15rem;
+  .sample {
+    margin: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+    min-height: 9rem;
   }
 
-  .console-body p.out + p {
-    margin-top: 0.9rem;
+  .sample .prompt-text {
+    color: var(--ink);
+  }
+
+  .sample .gen {
+    color: var(--red);
   }
 
   .products {

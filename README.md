@@ -24,7 +24,10 @@ Node 20.3 or newer.
 | `site/src/lib/github.ts` | Public-repo count fetched from GitHub at build time (shows a dash if GitHub is unreachable) |
 | `site/src/styles/global.css` | Design tokens. Paper is the base; sections opt into `t-graphite` or `t-concrete` |
 | `site/src/components/FieldCanvas.astro` | Hero animation: neural network, silicon wafer, Bloch sphere. Canvas 2D, no libraries |
-| `site/src/components/TokenizerPlayground.astro` | Live tokenizer on `/ai` (gpt-tokenizer, MIT). Vocabularies load only when the playground is reached |
+| `site/src/lib/titan.ts` | Titan-nano inference engine in plain TypeScript (no ML library); must match PyTorch, see `research/titan-nano/parity.test.ts` |
+| `site/src/components/TitanDemo.astro` | Live Titan-nano demo on `/ai`: completion, real next-character probabilities, real attention |
+| `site/public/models/titan-nano/` | Exported int8 weights (`weights.bin`) and `model.json` |
+| `research/titan-nano/` | Titan-nano dataset, model, training, baselines, export and parity test (see its README) |
 | `site/src/components/ModelEmbed.astro` | Click-to-load Sketchfab 3D models on `/semiconductors` |
 | `site/public/analytics.js` | GA4 and PostHog, loaded after page load, session recording off, skipped under Do Not Track / GPC |
 | `site/scripts/make_images.py` | Regenerates favicon.ico, apple-touch-icon.png and og-default.png |

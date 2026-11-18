@@ -1,79 +1,171 @@
 ---
 import Base from "../layouts/Base.astro";
-import TokenizerPlayground from "../components/TokenizerPlayground.astro";
-import AttentionArcs from "../components/AttentionArcs.astro";
-import { AI_DOMAINS } from "../data/site";
+import TitanDemo from "../components/TitanDemo.astro";
+import TrainingCurve from "../components/TrainingCurve.astro";
+import { AI_DOMAINS, TITAN_CODE_URL } from "../data/site";
+import titan from "../data/titan-nano.json";
+
+// Every number on this page comes from titan-nano.json, written by research/titan-nano/export.py.
+const c = titan.config;
+const f32 = titan.test.float32;
+const i8 = titan.test.int8;
+const bl = titan.baselines;
+const params = (titan.params / 1e6).toFixed(2);
+const minutes = Math.round(titan.train_seconds / 60);
+const gain = (1 - i8.bpc / bl.test_bpc_best_order) * 100; // positive: Titan-nano needs fewer bits than the n-gram
+const versusNgram =
+  gain >= 0.5
+    ? `${gain.toFixed(0)}% fewer bits than the best n-gram`
+    : gain > -0.5
+      ? "level with the best n-gram"
+      : `${(-gain).toFixed(0)}% behind the best n-gram`;
+const fmt = (n: number) => n.toLocaleString("en-US");
 
 const steps = [
   {
-    name: "Tokenize",
-    body: "Text is cut into tokens from a fixed vocabulary, usually learned with byte-pair encoding. Each token becomes an integer ID. Common English words are often one token; rarer words and many non-Latin scripts break into several.",
-    formula: '"read tokens" → [1293, 20290]  (o200k_base)',
+    name: "Read characters",
+    body: `Titan-nano reads code one character at a time from a ${c.vocab_size}-symbol alphabet: printable ASCII plus newline. No tokenizer is needed, which keeps the whole model small enough to explain and to run in a browser.`,
+    ours: `vocabulary ${c.vocab_size} · context ${c.ctx} characters`,
   },
   {
     name: "Embed",
-    body: "Each ID selects a row from a learned table: a vector of hundreds or thousands of numbers. Information about each token's position in the sequence is added, so order is not lost.",
-    formula: "x_i = E[id_i] + position(i)",
+    body: `Each character becomes a vector of ${c.d_model} numbers looked up from a learned table, and a second learned table adds where in the window it sits.`,
+    ours: `x = tok[ch] + pos[t]   (${c.d_model} dims)`,
   },
   {
     name: "Attend",
-    body: "Every token builds a query, a key and a value. A token's output is a weighted mix of the values of earlier tokens, with weights from how well its query matches their keys. A causal mask stops it from looking ahead.",
-    formula: "Attention(Q, K, V) = softmax(QKᵀ / √d) V",
+    body: `In each layer, ${c.n_head} attention heads let every position gather information from earlier positions: the matching bracket, the indentation of the line above, the name of a variable defined earlier. A causal mask stops it from seeing the future. You can watch this in the demo.`,
+    ours: "Attention(Q, K, V) = softmax(QKᵀ / √d) V",
   },
   {
     name: "Transform",
-    body: "Attention is followed by a small feed-forward network. The pair forms one layer, wrapped in residual connections and normalisation. Models stack dozens of these layers.",
-    formula: "h ← h + Attn(norm(h));  h ← h + MLP(norm(h))",
+    body: `A small feed-forward network (${4 * c.d_model} hidden units) follows attention. Attention plus feed-forward is one layer; Titan-nano stacks ${c.n_layer}, with residual connections and LayerNorm.`,
+    ours: `${c.n_layer} layers × (attention + MLP) · ${params}M parameters`,
   },
   {
     name: "Predict",
-    body: "The last vector is mapped to one score per vocabulary entry. Softmax turns scores into probabilities, one token is chosen, appended to the text, and the whole loop runs again.",
-    formula: "p(next) = softmax(W · h_last)",
+    body: `The final vector is compared with every character's embedding to score all ${c.vocab_size} possibilities. Softmax turns scores into the probabilities you see in the demo; one character is chosen and the loop repeats.`,
+    ours: "p(next) = softmax(LN(h) · tokᵀ)",
   },
 ];
 ---
 
 <Base
   title="NeuroTitan AI"
-  description="How a large language model works, step by step, with a live tokenizer you can try in English, Hindi and Odia. And what NeuroTitan Labs is building."
+  description={`Titan-nano: NeuroTitan Labs' first language model, a ${params}M-parameter transformer trained from scratch on Python code. It runs in your browser, with its real attention shown live.`}
 >
   <section class="hero t-graphite">
     <div class="wrap hero-grid">
       <div class="hero-text">
-        <p class="label label--red">NeuroTitan AI</p>
-        <h1 class="display">Inside a language model.</h1>
+        <p class="label label--red">NeuroTitan AI · {titan.name} {titan.version}</p>
+        <h1 class="display">Our first model, built from scratch.</h1>
         <p class="lede">
-          A large language model does one thing: given some text, it scores every possible next token and picks one.
-          Here is how that works, step by step, with a tokenizer you can try live, and what our lab is doing about it.
+          {titan.name} is a {params}-million-parameter transformer that NeuroTitan Labs designed, trained and tested
+          in-house on Python code. It has learned the shape of Python (indentation, keywords, brackets, naming) but not
+          yet what code means. It runs entirely in your browser on an inference engine we wrote ourselves: no AI
+          library, no server, nothing you type leaves your device.
         </p>
         <div class="actions">
-          <a class="button" href="#playground">Try the tokenizer</a>
-          <a class="button button--ghost" href="#how">How it works</a>
+          <a class="button" href="#demo">Try Titan-nano</a>
+          <a class="button button--ghost" href="#results">See the results</a>
         </div>
       </div>
-      <div class="status card" data-reveal>
-        <div class="console-bar"><i></i><i></i><i></i><span>neurotitan-ai · status</span></div>
+      <div class="card spec" data-reveal>
+        <div class="console-bar"><i></i><i></i><i></i><span>model card · {titan.name.toLowerCase()}-{titan.version}</span></div>
         <dl>
-          <div><dt class="label">Model released</dt><dd>None yet</dd></div>
-          <div><dt class="label">Stage</dt><dd>Measurement and reproduction</dd></div>
-          <div><dt class="label">Current questions</dt><dd>Tokenizer cost for Indian languages · quantization on laptops · how small models generalise</dd></div>
-          <div><dt class="label">Release rule</dt><dd>Weights, training code, data card and evaluation harness ship together, or not at all</dd></div>
+          <div><dt class="label">Architecture</dt><dd>Decoder-only transformer · {c.n_layer} layers · {c.n_head} heads · width {c.d_model}</dd></div>
+          <div><dt class="label">Parameters</dt><dd>{fmt(titan.params)}</dd></div>
+          <div><dt class="label">Trained on</dt><dd>{fmt(titan.data.chars.train)} characters of Python ({titan.data.files.train} files)</dd></div>
+          <div><dt class="label">Training compute</dt><dd>{minutes} min wall-clock on one laptop CPU (Intel i9-13980HX, no GPU) · seed {titan.train.seed}</dd></div>
+          <div><dt class="label">Test score</dt><dd class="hot">{i8.bpc.toFixed(3)} bits/char · {versusNgram}</dd></div>
+          <div><dt class="label">Download</dt><dd>{(titan.weights_bytes / 1e6).toFixed(2)} MB of int8 weights</dd></div>
         </dl>
       </div>
     </div>
   </section>
 
-  <section class="section dots" id="how">
+  <section class="section t-concrete" id="demo-section">
     <div class="wrap">
       <div class="section-head section-head--split" data-reveal>
         <div>
-          <p class="label">How an LLM works</p>
-          <h2>Five steps, repeated for every token</h2>
+          <p class="label">Live demo</p>
+          <h2>Write Python. Watch it think.</h2>
         </div>
         <p class="lede">
-          This is the decoder-only transformer, the design behind most current language models. The attention step
-          comes from Vaswani et al., <a href="https://arxiv.org/abs/1706.03762" rel="noopener">“Attention Is All You
-          Need”</a>, 2017.
+          Start some code and press Complete. You see the model's real probabilities for the next character and,
+          as red shading, which earlier characters its attention picked out. Choose any layer or head.
+        </p>
+      </div>
+      <TitanDemo weightsBytes={titan.weights_bytes} nLayer={c.n_layer} nHead={c.n_head} />
+    </div>
+  </section>
+
+  <section class="section dots" id="results">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">Results</p>
+          <h2>Measured on code it never saw</h2>
+        </div>
+        <p class="lede">
+          The test set is {titan.data.files.test} whole files from the standard library, held out by file before
+          training, {fmt(f32.chars)} characters in all. Lower bits per character means the model is less surprised by
+          real code.
+        </p>
+      </div>
+      <div class="results">
+        <div class="table-wrap card" data-reveal>
+          <table>
+            <thead>
+              <tr><th>Model</th><th>Bits / char ↓</th><th>Next-char accuracy ↑</th></tr>
+            </thead>
+            <tbody>
+              <tr class="hot"><td>{titan.name}, int8 (what this page runs)</td><td>{i8.bpc.toFixed(3)}</td><td>{(i8.accuracy * 100).toFixed(1)}%</td></tr>
+              <tr><td>{titan.name}, float32</td><td>{f32.bpc.toFixed(3)}</td><td>{(f32.accuracy * 100).toFixed(1)}%</td></tr>
+              <tr><td>Best n-gram (order {bl.best_order_on_val}, picked on validation)</td><td>{bl.test_bpc_best_order.toFixed(3)}</td><td>not measured</td></tr>
+              <tr><td>Character frequencies only (unigram)</td><td>{bl.test_bpc_unigram.toFixed(3)}</td><td>not measured</td></tr>
+              <tr><td>Random guessing ({c.vocab_size} symbols)</td><td>{bl.uniform_bpc.toFixed(3)}</td><td>{(100 / c.vocab_size).toFixed(1)}%</td></tr>
+            </tbody>
+          </table>
+          <p class="note">
+            n-grams use Witten-Bell smoothing; their order was chosen on the validation split, never on test.
+            Quantizing to int8 changed the test score by {(i8.bpc - f32.bpc).toFixed(3)} bits per character.
+          </p>
+        </div>
+        <div class="card chart" data-reveal>
+          <p class="label">Training run · {fmt(titan.train.steps)} steps · {minutes} min</p>
+          <TrainingCurve
+            curve={titan.curve}
+            baseline={bl.test_bpc_best_order}
+            baselineLabel={`best n-gram (order ${bl.best_order_on_val})`}
+            testBpc={i8.bpc}
+          />
+        </div>
+        <div class="card samples" data-reveal>
+          <p class="label">Unedited samples · temperature {titan.samples[0].temperature} · seed {titan.samples[0].seed} · not cherry-picked</p>
+          {
+            titan.samples.map((smp) => (
+              <pre class="sample"><span class="sp">{smp.prompt}</span><span class="sg">{smp.completion}</span></pre>
+            ))
+          }
+          <p class="note">The second prompt shows a failure: the model got stuck producing spaces. We show it because it happens.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">How Titan-nano works</p>
+          <h2>Five steps, repeated for every character</h2>
+        </div>
+        <p class="lede">
+          The same decoder-only transformer design as large language models (Vaswani et al.,
+          <a href="https://arxiv.org/abs/1706.03762" rel="noopener">“Attention Is All You Need”</a>, 2017), at a size you
+          can read end to end. Our browser engine is about 250 lines of TypeScript and matches our PyTorch model on
+          fixed test prompts.
         </p>
       </div>
       <ol class="steps">
@@ -85,67 +177,54 @@ const steps = [
                 <h3>{s.name}</h3>
                 <p>{s.body}</p>
               </div>
-              <code>{s.formula}</code>
+              <code>{s.ours}</code>
             </li>
           ))
         }
       </ol>
-      <div class="attn card" data-reveal>
-        <div>
-          <p class="label label--red">Step 03, drawn</p>
-          <h3>Attention lets “it” find “chip”</h3>
-          <p class="muted">
-            To predict what comes after “it”, the model needs to know what “it” refers to. Attention lets that token
-            draw most of its information from “chip”, two positions back.
-          </p>
-        </div>
-        <AttentionArcs />
-      </div>
-    </div>
-  </section>
-
-  <section class="section t-concrete">
-    <div class="wrap">
-      <div class="section-head section-head--split" data-reveal>
-        <div>
-          <p class="label">Step 01, live</p>
-          <h2>Watch your text become tokens</h2>
-        </div>
-        <p class="lede">
-          Type anything, or pick a language. Compare how many tokens the same sentence needs in English, Hindi and
-          Odia: every extra token costs context space, time and money.
-        </p>
-      </div>
-      <TokenizerPlayground />
     </div>
   </section>
 
   <section class="section t-graphite">
     <div class="wrap two-col">
       <div class="section-head" data-reveal>
-        <p class="label">What we are building</p>
-        <h2>Measure first, then build</h2>
+        <p class="label">Limits</p>
+        <h2>What it cannot do</h2>
       </div>
-      <div class="build" data-reveal>
-        <p class="lede">
-          We have not released a model, and we will not announce one before it exists. Our AI work starts with
-          questions a small lab can answer properly on ordinary hardware, each published with its code.
+      <ul class="limits" data-reveal>
+        <li>It has seen one codebase: the Python standard library. It writes in that style and knows nothing else.</li>
+        <li>It writes code that looks like Python but usually does not make sense: it has learned structure, not meaning.</li>
+        <li>Always choosing the single most likely character makes it loop ("filename, filename, …"). The demo samples at temperature 0.5 to reduce this. On some prompts it still gets stuck, for example emitting only spaces.</li>
+        <li>It does not plan programs, follow instructions or answer questions.</li>
+        <li>Its window is {c.ctx} characters, so it forgets anything earlier in a long file.</li>
+        <li>It can produce code that looks right and is wrong. Never run its output without reading it.</li>
+        <li>It is a research model and a teaching tool, not a product.</li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section dots">
+    <div class="wrap two-col">
+      <div class="section-head" data-reveal>
+        <p class="label">Reproduce it</p>
+        <h2>Every number on this page, from five commands</h2>
+        <p class="muted">Python {titan.data.source.split(" ")[1]}, PyTorch {titan.torch.split("+")[0]}, CPU only. The published run lost about ten minutes at the start to Windows power throttling; the README explains how to avoid it.</p>
+      </div>
+      <div class="repro" data-reveal>
+        <div class="console">
+          <div class="console-bar"><i></i><i></i><i></i><span>research/titan-nano</span></div>
+          <div class="console-body">
+            <p><span class="prompt">$</span> python data.py --out data</p>
+            <p><span class="prompt">$</span> python train.py --steps {titan.train.steps} --bs {titan.train.bs} --seed {titan.train.seed}</p>
+            <p><span class="prompt">$</span> python baselines.py</p>
+            <p><span class="prompt">$</span> python export.py</p>
+            <p><span class="prompt">$</span> node --experimental-strip-types parity.test.ts</p>
+          </div>
+        </div>
+        <p class="muted">
+          Data: {titan.data.source}, under the {titan.data.licence}. <a href={TITAN_CODE_URL} rel="noopener">Code, logs and
+          weights</a>.
         </p>
-        <ul class="qs">
-          <li>
-            <span class="label label--red">Q1</span>
-            <span>How many more tokens do Odia, Hindi and Bengali cost than English across the tokenizers in use today?</span>
-          </li>
-          <li>
-            <span class="label label--red">Q2</span>
-            <span>How much accuracy do 4-bit and 8-bit quantized small models lose, and how much speed do they gain on a laptop CPU?</span>
-          </li>
-          <li>
-            <span class="label label--red">Q3</span>
-            <span>When does a small transformer stop memorising and start generalising, and what controls it?</span>
-          </li>
-        </ul>
-        <p class="muted">Results will appear on the <a href="/blog">blog</a>, with repositories you can rerun.</p>
       </div>
     </div>
   </section>
@@ -179,7 +258,7 @@ const steps = [
 
   .hero-grid {
     display: grid;
-    grid-template-columns: 1.2fr 1fr;
+    grid-template-columns: 1.15fr 1fr;
     gap: clamp(2rem, 5vw, 4rem);
     align-items: center;
     padding-block: clamp(4rem, 9vw, 7rem);
@@ -197,45 +276,126 @@ const steps = [
     margin-top: 0.5rem;
   }
 
-  .status {
+  .spec {
     background: var(--paper-2);
     border-color: var(--rule);
     box-shadow: 8px 8px 0 #000;
   }
 
-  .status dl {
+  .spec dl {
     margin: 0;
-    padding: 0.5rem 1.25rem 1.25rem;
+    padding: 0.4rem 1.25rem 1.1rem;
   }
 
-  .status dl div {
+  .spec dl div {
     display: grid;
-    gap: 0.25rem;
-    padding-block: 0.85rem;
+    grid-template-columns: 9.5rem 1fr;
+    gap: 1rem;
+    padding-block: 0.7rem;
     border-bottom: 1px solid var(--rule);
   }
 
-  .status dl div:last-child {
+  .spec dl div:last-child {
     border-bottom: 0;
   }
 
-  .status dd {
+  .spec dd {
     margin: 0;
     font-family: var(--mono);
+    font-size: 0.875rem;
+  }
+
+  .spec .hot {
+    color: var(--red);
+  }
+
+  .lede a,
+  .repro a {
+    color: var(--red);
+  }
+
+  .results {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .table-wrap,
+  .chart {
+    padding: 1.4rem;
+    display: grid;
+    gap: 1rem;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
     font-size: 0.9375rem;
   }
 
-  .status dl div:first-child dd {
-    color: var(--red);
+  th,
+  td {
+    text-align: left;
+    padding: 0.6rem 0.5rem 0.6rem 0;
+    border-bottom: 1px solid var(--rule);
   }
 
-  .lede a {
+  th {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--grey);
+    border-bottom-color: var(--ink);
+  }
+
+  td:not(:first-child),
+  th:not(:first-child) {
+    font-family: var(--mono);
+    text-align: right;
+  }
+
+  tr.hot td {
     color: var(--red);
+    font-weight: 600;
+  }
+
+  .note {
+    font-size: 0.875rem;
+    color: var(--grey);
+  }
+
+  .samples {
+    padding: 1.4rem;
+    display: grid;
+    gap: 0.9rem;
+    grid-column: 1 / -1;
+  }
+
+  .sample {
+    margin: 0;
+    padding: 0.9rem 1rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1.55;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 14rem;
+    overflow: auto;
+  }
+
+  .sample .sg {
+    color: var(--red);
+    background: rgba(163, 33, 27, 0.06);
   }
 
   .steps {
     list-style: none;
-    margin: 0 0 3rem;
+    margin: 0;
     padding: 0;
     border-top: 1px solid var(--ink);
   }
@@ -267,25 +427,12 @@ const steps = [
 
   .step code {
     font-family: var(--mono);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     background: var(--paper-2);
     border: 1px solid var(--rule);
     padding: 0.6rem 0.8rem;
     overflow-x: auto;
     white-space: nowrap;
-  }
-
-  .attn {
-    display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: 2rem;
-    align-items: center;
-    padding: clamp(1.25rem, 3vw, 2rem);
-  }
-
-  .attn h3 {
-    font-size: 1.6rem;
-    margin-block: 0.5rem;
   }
 
   .two-col {
@@ -294,28 +441,33 @@ const steps = [
     gap: clamp(2rem, 5vw, 4rem);
   }
 
-  .build {
-    display: grid;
-    gap: 1.5rem;
-  }
-
-  .qs {
-    list-style: none;
+  .limits {
     margin: 0;
     padding: 0;
+    list-style: none;
     border-top: 1px solid var(--rule);
   }
 
-  .qs li {
-    display: grid;
-    grid-template-columns: 2.5rem 1fr;
-    gap: 0.75rem;
-    padding-block: 1rem;
+  .limits li {
+    padding: 1rem 0 1rem 1.5rem;
     border-bottom: 1px solid var(--rule);
+    position: relative;
+    color: var(--ink-2);
   }
 
-  .build a {
-    color: var(--red);
+  .limits li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 1.55rem;
+    width: 0.5rem;
+    height: 0.5rem;
+    background: var(--red);
+  }
+
+  .repro {
+    display: grid;
+    gap: 1rem;
   }
 
   .domains {
@@ -345,8 +497,8 @@ const steps = [
 
   @media (max-width: 60rem) {
     .hero-grid,
-    .two-col,
-    .attn {
+    .results,
+    .two-col {
       grid-template-columns: 1fr;
     }
 
@@ -366,6 +518,11 @@ const steps = [
   @media (max-width: 36rem) {
     .domains {
       grid-template-columns: 1fr;
+    }
+
+    .spec dl div {
+      grid-template-columns: 1fr;
+      gap: 0.2rem;
     }
   }
 </style>

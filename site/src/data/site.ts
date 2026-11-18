@@ -79,7 +79,7 @@ export const FIELDS: Field[] = [
 export const AI_DOMAINS = [
   {
     name: "Natural language processing",
-    body: "Language models, tokenization and evaluation. How text becomes numbers, and how much meaning survives the trip, especially for Indian languages.",
+    body: "Language models built and measured in-house, starting with Titan-nano. Next: how tokenization treats Indian languages.",
   },
   {
     name: "Computer vision",
@@ -127,13 +127,16 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
-    name: "NeuroTitan AI",
-    status: "In research",
-    kind: "dev",
+    name: "Titan-nano",
+    status: "Open source",
+    kind: "live",
     summary:
-      "Our language-model work. No model has been released yet; the first results are measurements of tokenizers, quantization and small-model training, published with code.",
-    points: ["Live tokenizer playground on this site", "Evaluation code released with every result"],
-    links: [{ label: "Read more", href: "/ai" }],
+      "NeuroTitan Labs' first language model: a small transformer trained from scratch on Python code. It has learned the structure of Python, not yet its meaning. It runs in your browser on our own inference engine, with its real attention shown live.",
+    points: ["Trained from scratch on one CPU", "Runs in the browser, no server", "Code, logs and weights published"],
+    links: [
+      { label: "Try it", href: "/ai#demo" },
+      { label: "Results", href: "/ai#results" },
+    ],
   },
   {
     name: "QML-benchmarks",
@@ -199,6 +202,9 @@ export const TOOLS = [
  * No team list: the live site's team section was deliberately hidden on 2026-11-01
  * (AkshitTiwarii/NeuroTitan commit 040d19e). Add people back only when gg says so.
  */
+
+/** Where the Titan-nano code, logs and weights live (valid once the redesign branch is merged). */
+export const TITAN_CODE_URL = "https://github.com/NeuroTitan-Hub/NeuroTitan/tree/main/research/titan-nano";
 
 export const CAMPUS_AMBASSADOR_FORM =
   "https://docs.google.com/forms/d/e/1FAIpQLSdbtblF3w5Nqnckn_gW1zs3ybf24725lcJaZOKR54gunskXcg/viewform";

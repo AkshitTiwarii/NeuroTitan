@@ -1,0 +1,126 @@
+---
+/**
+ * Training curve drawn at build time from research/titan-nano/<run>/log.csv
+ * (via src/data/titan-nano.json). Every point is a logged value; the dashed
+ * line is the best n-gram baseline on the test set, for reference.
+ */
+type Point = { step: number; train_bpc: number; val_bpc: number };
+interface Props {
+  curve: Point[];
+  baseline: number;
+  baselineLabel: string;
+  testBpc: number;
+}
+const { curve, baseline, baselineLabel, testBpc } = Astro.props;
+
+const W = 640, H = 300, L = 52, R = 16, T = 16, B = 40;
+const maxStep = curve[curve.length - 1].step;
+const pts = curve.filter((p) => p.step > 0); // step 0 is the untrained model (~6.2 bits), it flattens the plot
+const yMax = Math.ceil(Math.max(baseline, ...pts.map((p) => Math.max(p.train_bpc, p.val_bpc))) * 2) / 2;
+const yMin = Math.floor(Math.min(testBpc, ...pts.map((p) => Math.min(p.train_bpc, p.val_bpc))) * 2) / 2;
+const x = (s: number) => L + (s / maxStep) * (W - L - R);
+const y = (v: number) => T + ((yMax - v) / (yMax - yMin)) * (H - T - B);
+const path = (key: "train_bpc" | "val_bpc") => pts.map((p, i) => `${i ? "L" : "M"}${x(p.step).toFixed(1)},${y(p[key]).toFixed(1)}`).join(" ");
+const yTicks: number[] = [];
+for (let v = yMin; v <= yMax + 1e-9; v += 0.5) yTicks.push(Number(v.toFixed(1)));
+const xTicks = [0, 0.25, 0.5, 0.75, 1].map((f) => Math.round((f * maxStep) / 100) * 100);
+---
+
+<figure class="curve">
+  <svg viewBox={`0 0 ${W} ${H}`} role="img" aria-labelledby="curve-title curve-desc">
+    <title id="curve-title">Titan-nano training curve</title>
+    <desc id="curve-desc">
+      Bits per character on training and validation data, falling from {pts[0].val_bpc} to {pts[pts.length - 1].val_bpc}
+      bits on validation over {maxStep} steps. Best n-gram baseline on test: {baseline} bits.
+    </desc>
+    {yTicks.map((v) => (
+      <g>
+        <line class="grid" x1={L} x2={W - R} y1={y(v)} y2={y(v)} />
+        <text class="tick" x={L - 8} y={y(v) + 4} text-anchor="end">{v.toFixed(1)}</text>
+      </g>
+    ))}
+    {xTicks.map((s) => <text class="tick" x={x(s)} y={H - B + 18} text-anchor="middle">{s}</text>)}
+    <text class="axis" x={(L + W - R) / 2} y={H - 4} text-anchor="middle">training step</text>
+    <text class="axis" x={14} y={(T + H - B) / 2} text-anchor="middle" transform={`rotate(-90 14 ${(T + H - B) / 2})`}>bits per character</text>
+    <line class="base" x1={L} x2={W - R} y1={y(baseline)} y2={y(baseline)} />
+    <text class="base-label" x={W - R} y={y(baseline) - 6} text-anchor="end">{baselineLabel} · {baseline.toFixed(2)}</text>
+    <path class="train" d={path("train_bpc")} />
+    <path class="val" d={path("val_bpc")} />
+    {pts.map((p) => <circle class="val-dot" cx={x(p.step)} cy={y(p.val_bpc)} r="2.6" />)}
+  </svg>
+  <figcaption class="label">
+    <span class="k k--val"></span> validation <span class="k k--train"></span> training (smoothed) <span class="k k--base"></span> best n-gram on test
+  </figcaption>
+</figure>
+
+<style>
+  .curve {
+    margin: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  svg {
+    width: 100%;
+    height: auto;
+  }
+
+  .grid {
+    stroke: var(--rule);
+    stroke-width: 1;
+  }
+
+  .tick,
+  .axis,
+  .base-label {
+    font-family: var(--mono);
+    font-size: 11px;
+    fill: var(--grey);
+  }
+
+  .base {
+    stroke: var(--ink-2);
+    stroke-width: 1.2;
+    stroke-dasharray: 5 4;
+  }
+
+  .train {
+    fill: none;
+    stroke: var(--ink-2);
+    stroke-width: 1.5;
+    opacity: 0.6;
+  }
+
+  .val {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 2.2;
+  }
+
+  .val-dot {
+    fill: var(--red);
+  }
+
+  .k {
+    display: inline-block;
+    width: 0.9rem;
+    height: 0.2rem;
+    vertical-align: middle;
+    margin: 0 0.3rem 0 0.8rem;
+  }
+
+  .k--val {
+    background: var(--red);
+    margin-left: 0;
+  }
+
+  .k--train {
+    background: var(--ink-2);
+    opacity: 0.6;
+  }
+
+  .k--base {
+    border-top: 2px dashed var(--ink-2);
+    height: 0;
+  }
+</style>
