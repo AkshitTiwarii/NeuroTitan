@@ -18,13 +18,17 @@ Node 20.3 or newer.
 
 | Path | What it is |
 |---|---|
-| `site/src/pages/` | One file per route: `/`, `/research`, `/blog`, `/blog/<slug>`, `/about`, `/privacy`, `404`, `rss.xml`, `robots.txt` |
+| `site/src/pages/` | One file per route: `/`, `/ai`, `/semiconductors`, `/research`, `/products`, `/blog`, `/blog/<slug>`, `/about`, `/privacy`, `404`, `rss.xml`, `robots.txt` |
 | `site/src/content/blog/` | Blog posts, one Markdown file each (see below) |
-| `site/src/data/site.ts` | Site facts: fields, people, projects, contact. Every line must be true and checkable |
-| `site/src/styles/global.css` | Design tokens (paper, ink, grey, one red accent) and base styles |
+| `site/src/data/site.ts` | Site facts: fields, products, people, AI domains, contact. Every line must be true and checkable |
+| `site/src/lib/github.ts` | Public-repo count fetched from GitHub at build time (shows a dash if GitHub is unreachable) |
+| `site/src/styles/global.css` | Design tokens. Paper is the base; sections opt into `t-graphite` or `t-concrete` |
+| `site/src/components/FieldCanvas.astro` | Hero animation: neural network, silicon wafer, Bloch sphere. Canvas 2D, no libraries |
+| `site/src/components/TokenizerPlayground.astro` | Live tokenizer on `/ai` (gpt-tokenizer, MIT). Vocabularies load only when the playground is reached |
+| `site/src/components/ModelEmbed.astro` | Click-to-load Sketchfab 3D models on `/semiconductors` |
 | `site/public/analytics.js` | GA4 and PostHog, loaded after page load, session recording off, skipped under Do Not Track / GPC |
 | `site/scripts/make_images.py` | Regenerates favicon.ico, apple-touch-icon.png and og-default.png |
-| `vercel.json` | Build settings, security headers, the `/semiconductor` redirect |
+| `vercel.json` | Build settings, security headers (strict script CSP: no inline scripts, see `assetsInlineLimit` in astro.config.mjs), the `/semiconductor` redirect |
 
 ## Adding a blog post
 

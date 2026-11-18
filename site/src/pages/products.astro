@@ -1,0 +1,182 @@
+---
+import Base from "../layouts/Base.astro";
+import { PRODUCTS, SITE } from "../data/site";
+
+const legend = [
+  { kind: "live", word: "Open source", text: "Public code you can use today." },
+  { kind: "dev", word: "In development / In research", text: "Being built; not ready for users yet." },
+  { kind: "idle", word: "Concept", text: "A design on paper. No working software yet." },
+];
+---
+
+<Base
+  title="Products"
+  description="What NeuroTitan Labs is building, from the ECHO memory-assistant glasses to open-source quantum benchmarks, each labelled with where it really stands."
+>
+  <section class="hero t-graphite">
+    <div class="wrap page-head">
+      <p class="label label--red">Products</p>
+      <h1 class="display">What we are building.</h1>
+      <p class="lede">
+        Every product here exists in some form you can open. Each one is labelled with where it really stands, so you
+        know what you can use today and what is still being built.
+      </p>
+      <ul class="legend">
+        {
+          legend.map((l) => (
+            <li>
+              <span class={`pill pill--${l.kind}`}>{l.word}</span>
+              <span class="muted">{l.text}</span>
+            </li>
+          ))
+        }
+      </ul>
+    </div>
+  </section>
+
+  <section class="section dots">
+    <div class="wrap list">
+      {
+        PRODUCTS.map((p, i) => (
+          <article class={`product card ${i === 0 ? "product--lead" : ""}`} data-reveal>
+            <div class="head">
+              <span class="label">{String(i + 1).padStart(2, "0")}</span>
+              <span class={`pill pill--${p.kind}`}>{p.status}</span>
+            </div>
+            <h2>{p.name}</h2>
+            <p class="summary">{p.summary}</p>
+            <ul class="points">
+              {p.points.map((pt) => <li>{pt}</li>)}
+            </ul>
+            <p class="links">
+              {p.links.map((l) => (
+                <a class="button button--ghost" href={l.href} rel={l.href.startsWith("http") ? "noopener" : undefined}>
+                  {l.label} →
+                </a>
+              ))}
+            </p>
+          </article>
+        ))
+      }
+    </div>
+  </section>
+
+  <section class="section t-concrete">
+    <div class="wrap ask">
+      <div>
+        <p class="label">Build with us</p>
+        <h2>Want to pilot ECHO or contribute?</h2>
+      </div>
+      <p class="lede">
+        Caregivers, clinicians and engineers who want to try or help build any of these can write to
+        <a href={`mailto:${SITE.email}`}>{SITE.email}</a>.
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  .legend {
+    list-style: none;
+    margin: 0.5rem 0 0;
+    padding: 0;
+    display: grid;
+    gap: 0.6rem;
+  }
+
+  .legend li {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.9375rem;
+  }
+
+  .list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.75rem;
+  }
+
+  .product {
+    display: grid;
+    align-content: start;
+    gap: 1rem;
+    padding: clamp(1.5rem, 3vw, 2.25rem);
+  }
+
+  .product--lead {
+    grid-column: 1 / -1;
+  }
+
+  .product--lead h2 {
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+  }
+
+  .head {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+
+  h2 {
+    font-size: clamp(1.9rem, 3.5vw, 2.6rem);
+  }
+
+  .summary {
+    font-size: 1.125rem;
+    color: var(--ink-2);
+    max-width: 46rem;
+  }
+
+  .points {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .points li {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    border: 1px solid var(--rule);
+    background: var(--paper-2);
+    padding: 0.25rem 0.6rem;
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 0.5rem;
+  }
+
+  .ask {
+    display: grid;
+    grid-template-columns: 1fr 1.3fr;
+    gap: 2rem;
+    align-items: end;
+  }
+
+  .ask h2 {
+    margin-top: 0.75rem;
+  }
+
+  .ask a {
+    color: var(--red);
+  }
+
+  @media (max-width: 56rem) {
+    .list,
+    .ask {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

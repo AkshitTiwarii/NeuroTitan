@@ -1,105 +1,209 @@
 ---
 import Base from "../layouts/Base.astro";
+import FieldCanvas from "../components/FieldCanvas.astro";
+import Ticker from "../components/Ticker.astro";
 import PostList from "../components/PostList.astro";
-import { FIELDS, PRINCIPLES, PROJECTS } from "../data/site";
+import { FIELDS, PEOPLE, PILLARS, PRINCIPLES, PRODUCTS, SITE, TOOLS, CAMPUS_AMBASSADOR_FORM } from "../data/site";
 import { getPublishedPosts } from "../lib/posts";
+import { getOrgStats } from "../lib/github";
 
-const posts = (await getPublishedPosts()).slice(0, 3);
-
-const steps = [
-  ["Question", "A specific claim we can test, with the paper or datasheet it comes from."],
-  ["Experiment", "Seeded code, pinned versions, raw logs kept."],
-  ["Rerun", "A second person reruns it from the README. Numbers must match."],
-  ["Publish", "Post, code and data go out together, limits stated."],
-];
+const allPosts = await getPublishedPosts();
+const posts = allPosts.slice(0, 3);
+const stats = await getOrgStats();
+const featured = PRODUCTS.slice(0, 4);
 ---
 
 <Base>
-  <section class="hero wrap">
-    <div class="hero-text">
-      <p class="label label--red">Independent research lab</p>
-      <h1>Research you can rerun.</h1>
-      <p class="lede">
-        NeuroTitan Labs works on machine learning, semiconductor design and quantum computing. Every result we
-        publish ships with the code, data and random seeds that produced it, and we report what did not work
-        next to what did.
-      </p>
-      <div class="actions">
-        <a class="button" href="/research">Research areas</a>
-        <a class="button button--ghost" href="/blog">Read the blog</a>
+  <!-- HERO: graphite stage -->
+  <section class="hero t-graphite">
+    <div class="wrap hero-grid">
+      <div class="hero-text">
+        <p class="label label--red">NeuroTitan Labs · independent research</p>
+        <h1 class="display">Research you can rerun.</h1>
+        <p class="lede">
+          We work on machine learning, chip design and quantum computing. Every result ships with the code, data and
+          random seeds that produced it, and we publish what did not work next to what did.
+        </p>
+        <div class="actions">
+          <a class="button" href="/ai">Explore NeuroTitan AI</a>
+          <a class="button button--ghost" href="/research">Research areas</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <FieldCanvas />
       </div>
     </div>
-
-    <figure class="method" aria-labelledby="method-caption">
-      <figcaption id="method-caption" class="label">How a result gets published</figcaption>
-      <ol>
-        {
-          steps.map(([name, text], i) => (
-            <li>
-              <span class="step-num">{String(i + 1).padStart(2, "0")}</span>
-              <span class="step-body">
-                <strong>{name}</strong>
-                <span>{text}</span>
-              </span>
-            </li>
-          ))
-        }
-      </ol>
-    </figure>
   </section>
 
-  <section class="section">
+  <Ticker items={TOOLS} label="Tools we use" />
+
+  <!-- FIELDS: paper with dot grid -->
+  <section class="section dots">
     <div class="wrap">
-      <div class="section-head">
-        <p class="label">Fields</p>
-        <h2>Three fields, one standard of evidence</h2>
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">01 · Fields</p>
+          <h2>Three fields, one standard of evidence</h2>
+        </div>
+        <p class="lede">
+          A result is not finished until someone other than its author has rerun it from the published code and got
+          the same numbers.
+        </p>
       </div>
-      <div class="fields">
+      <div class="bento">
         {
           FIELDS.map((f) => (
-            <article class="field">
-              <p class="label label--red">{f.index}</p>
-              <h3>
-                <a href={`/research#${f.id}`}>{f.name}</a>
-              </h3>
+            <a class="field card" href={f.href} data-reveal>
+              <span class="label label--red">{f.index}</span>
+              <h3>{f.name}</h3>
               <p>{f.summary}</p>
+              <span class="more label">Open →</span>
+            </a>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <!-- AI: graphite with a console -->
+  <section class="section t-graphite ai">
+    <div class="wrap ai-grid">
+      <div data-reveal>
+        <p class="label">02 · NeuroTitan AI</p>
+        <h2>See how a language model reads</h2>
+        <p class="lede">
+          Before a model can think about your sentence, a tokenizer cuts it into pieces. The same sentence often costs
+          more pieces in Hindi or Odia than in English. Try it live: it runs in your browser and nothing
+          is sent anywhere.
+        </p>
+        <div class="actions">
+          <a class="button" href="/ai#playground">Open the tokenizer</a>
+          <a class="button button--ghost" href="/ai">How LLMs work</a>
+        </div>
+      </div>
+      <div class="console" data-reveal aria-label="Example of tokenizer output">
+        <div class="console-bar"><i></i><i></i><i></i><span>tokenizer · o200k_base</span></div>
+        <div class="console-body">
+          <p><span class="prompt">›</span> encode("Language models read tokens")</p>
+          <p class="out">["Language", " models", " read", " tokens"]  <span class="label">4 tokens</span></p>
+          <p><span class="prompt">›</span> encode("भाषा मॉडल टोकन")</p>
+          <p class="out">["भ", "ाष", "ा", " मॉडल", " ट", "ोक", "न"]  <span class="label">7 tokens</span></p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRODUCTS -->
+  <section class="section">
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">03 · Products</p>
+          <h2>What we are building</h2>
+        </div>
+        <p class="lede">Each one is labelled with where it really stands.</p>
+      </div>
+      <div class="products">
+        {
+          featured.map((p) => (
+            <article class="product card" data-reveal>
+              <header>
+                <h3>{p.name}</h3>
+                <span class={`pill pill--${p.kind}`}>{p.status}</span>
+              </header>
+              <p>{p.summary}</p>
+              <p class="links">
+                {p.links.map((l) => (
+                  <a href={l.href} rel={l.href.startsWith("http") ? "noopener" : undefined}>
+                    {l.label} →
+                  </a>
+                ))}
+              </p>
             </article>
           ))
         }
       </div>
+      <p class="all"><a href="/products">All products →</a></p>
     </div>
   </section>
 
+  <!-- NUMBERS: concrete band, only computed values -->
+  <section class="section t-concrete">
+    <div class="wrap numbers">
+      <div data-reveal>
+        <p class="label">04 · The lab in numbers</p>
+        <h2>Counted, not claimed</h2>
+        <p class="muted note">
+          These numbers are computed when the site is built, from GitHub and from this site's own content. Nothing
+          here is typed in by hand.
+        </p>
+      </div>
+      <dl class="tiles" data-reveal>
+        <div class="tile">
+          <dt class="label">Public repositories</dt>
+          <dd>{stats.publicRepos ?? "—"}</dd>
+          <dd class="src">GitHub · {SITE.githubOrg} · {stats.fetchedAt}</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Posts published</dt>
+          <dd>{allPosts.filter((p) => !p.data.draft).length}</dd>
+          <dd class="src">This site · first posts in review</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Research fields</dt>
+          <dd>{FIELDS.length}</dd>
+          <dd class="src">ML · semiconductors · quantum</dd>
+        </div>
+        <div class="tile">
+          <dt class="label">Products in progress</dt>
+          <dd>{PRODUCTS.filter((p) => p.kind === "dev").length}</dd>
+          <dd class="src">See products</dd>
+        </div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- BLOG -->
   <section class="section">
     <div class="wrap">
-      <div class="section-head">
-        <p class="label">Writing</p>
-        <h2>From the blog</h2>
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">05 · Blog</p>
+          <h2>From the lab notebook</h2>
+        </div>
+        <p class="lede">Two posts a week when they are ready. A post that is not ready waits.</p>
       </div>
       {
         posts.length > 0 ? (
           <PostList posts={posts} />
         ) : (
-          <p class="lede empty">
-            Nothing published yet. The first posts are being run and checked now. Each one will link to a public
-            repository you can rerun. <a href="/rss.xml">Follow by RSS</a>.
-          </p>
+          <div class="empty card" data-reveal>
+            <p class="label label--red">Coming soon</p>
+            <p>
+              The first posts are being run and checked now. Each one will link to a public repository you can
+              rerun. <a href="/rss.xml">Follow by RSS</a> or visit the <a href="/blog">blog</a>.
+            </p>
+          </div>
         )
       }
     </div>
   </section>
 
-  <section class="section">
+  <!-- STANDARDS + PILLARS -->
+  <section class="section dots">
     <div class="wrap two-col">
-      <div class="section-head">
-        <p class="label">Standards</p>
-        <h2>How we work</h2>
+      <div class="section-head" data-reveal>
+        <p class="label">06 · How we work</p>
+        <h2>The rules every result follows</h2>
       </div>
-      <dl class="principles">
+      <dl class="principles" data-reveal>
         {
-          PRINCIPLES.map((p) => (
+          [...PRINCIPLES, ...PILLARS].slice(0, 6).map((p, i) => (
             <div>
-              <dt>{p.title}</dt>
+              <dt>
+                <span class="label label--red">{String(i + 1).padStart(2, "0")}</span>
+                {p.title}
+              </dt>
               <dd>{p.body}</dd>
             </div>
           ))
@@ -108,21 +212,27 @@ const steps = [
     </div>
   </section>
 
-  <section class="section">
+  <!-- COMMUNITY + TEAM: concrete band -->
+  <section class="section t-concrete">
     <div class="wrap two-col">
-      <div class="section-head">
-        <p class="label">Open work</p>
-        <h2>What you can open today</h2>
+      <div class="section-head" data-reveal>
+        <p class="label">07 · People and community</p>
+        <h2>Join the lab</h2>
+        <p class="muted">Contribute on GitHub, represent the lab on your campus, or write to us.</p>
+        <div class="actions">
+          <a class="button" href={CAMPUS_AMBASSADOR_FORM} rel="noopener">Campus ambassador</a>
+          <a class="button button--ghost" href={SITE.github} rel="noopener">GitHub</a>
+        </div>
       </div>
-      <ul class="projects">
+      <ul class="people" data-reveal>
         {
-          PROJECTS.map((p) => (
+          PEOPLE.map((p) => (
             <li>
-              <a href={p.href} rel="noopener">
-                {p.name}
-                <span aria-hidden="true"> ↗</span>
+              <span class="person">{p.name}</span>
+              <span class="label">{p.role}</span>
+              <a href={p.github} rel="noopener">
+                GitHub<span class="visually-hidden"> profile of {p.name}</span> ↗
               </a>
-              <p>{p.note}</p>
             </li>
           ))
         }
@@ -133,99 +243,193 @@ const steps = [
 
 <style>
   .hero {
+    position: relative;
+    overflow: hidden;
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
+  }
+
+  .hero-grid {
     display: grid;
-    grid-template-columns: 1.35fr 1fr;
-    gap: clamp(2rem, 6vw, 5rem);
-    align-items: end;
-    padding-block: clamp(3.5rem, 10vw, 7.5rem) clamp(3rem, 7vw, 5rem);
+    grid-template-columns: 1.15fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+    min-height: min(84vh, 52rem);
+    padding-block: clamp(3rem, 8vw, 6rem);
   }
 
   .hero-text {
     display: grid;
-    gap: 1.5rem;
-  }
-
-  h1 {
-    font-size: clamp(2.75rem, 7vw, 5.25rem);
-    font-weight: 450;
-    letter-spacing: -0.025em;
-    line-height: 1.02;
+    gap: 1.6rem;
   }
 
   .actions {
     display: flex;
     flex-wrap: wrap;
-    gap: 0.75rem;
+    gap: 0.85rem;
     margin-top: 0.5rem;
   }
 
-  .method {
-    margin: 0;
-    border-top: 2px solid var(--ink);
-    padding-top: 1rem;
-  }
-
-  .method ol {
-    list-style: none;
-    margin: 1rem 0 0;
-    padding: 0;
-  }
-
-  .method li {
-    display: grid;
-    grid-template-columns: 2.5rem 1fr;
-    gap: 0.5rem;
-    padding-block: 0.85rem;
-    border-bottom: 1px solid var(--rule);
-  }
-
-  .step-num {
-    font-family: var(--mono);
-    font-size: 0.8125rem;
-    color: var(--red);
-    padding-top: 0.15rem;
-  }
-
-  .step-body {
-    display: grid;
-    gap: 0.15rem;
-    font-size: 0.9375rem;
-    color: var(--ink-2);
-  }
-
-  .step-body strong {
-    font-weight: 600;
-    color: var(--ink);
-  }
-
-  .fields {
+  .bento {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    border-top: 1px solid var(--ink);
+    gap: 1.5rem;
   }
 
   .field {
     display: grid;
     align-content: start;
-    gap: 0.75rem;
-    padding: 1.5rem 1.5rem 0 0;
+    gap: 0.9rem;
+    padding: 1.75rem;
+    text-decoration: none;
+    min-height: 20rem;
+    transition: transform 160ms ease, box-shadow 160ms ease;
   }
 
-  .field + .field {
-    border-left: 1px solid var(--rule);
-    padding-left: 1.5rem;
+  .field:hover {
+    color: inherit;
+    transform: translate(-2px, -2px);
+    box-shadow: 8px 8px 0 var(--red);
   }
 
   .field h3 {
-    font-size: 1.625rem;
+    font-size: 1.85rem;
   }
 
-  .field h3 a {
+  .field p {
+    color: var(--ink-2);
+  }
+
+  .field .more {
+    margin-top: auto;
+    align-self: end;
+  }
+
+  .ai-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: center;
+  }
+
+  .ai h2,
+  .numbers h2 {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+    margin-block: 0.85rem 1.25rem;
+  }
+
+  .ai .console {
+    box-shadow: 8px 8px 0 #000;
+  }
+
+  .console-body p + p {
+    margin-top: 0.15rem;
+  }
+
+  .console-body p.out + p {
+    margin-top: 0.9rem;
+  }
+
+  .products {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+
+  .product {
+    display: grid;
+    align-content: start;
+    gap: 0.9rem;
+    padding: 1.6rem;
+  }
+
+  .product header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 1rem;
+  }
+
+  .product h3 {
+    font-size: 1.6rem;
+  }
+
+  .product p {
+    color: var(--ink-2);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.25rem;
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+  }
+
+  .links a,
+  .all a {
+    color: var(--red);
     text-decoration: none;
   }
 
-  .field p:last-child {
-    color: var(--ink-2);
+  .all {
+    margin-top: 2rem;
+    font-family: var(--mono);
+    font-size: 0.875rem;
+  }
+
+  .numbers {
+    display: grid;
+    grid-template-columns: 1fr 1.4fr;
+    gap: clamp(2rem, 5vw, 4rem);
+    align-items: start;
+  }
+
+  .note {
+    max-width: 30rem;
+  }
+
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 0;
+    margin: 0;
+    border-top: 1px solid var(--ink);
+    border-left: 1px solid var(--ink);
+  }
+
+  .tile {
+    padding: 1.4rem 1.5rem;
+    border-right: 1px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    background: var(--paper);
+  }
+
+  .tile dd:not(.src) {
+    margin: 0.5rem 0 0.4rem;
+    font-family: var(--mono);
+    font-size: clamp(2.5rem, 5vw, 3.75rem);
+    font-weight: 500;
+    line-height: 1;
+    letter-spacing: -0.03em;
+  }
+
+  .tile:first-child dd {
+    color: var(--red);
+  }
+
+  .src {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--grey);
+  }
+
+  .empty {
+    display: grid;
+    gap: 0.75rem;
+    padding: 1.75rem;
+    max-width: 44rem;
   }
 
   .empty a {
@@ -234,7 +438,7 @@ const steps = [
 
   .two-col {
     display: grid;
-    grid-template-columns: 1fr 2fr;
+    grid-template-columns: 1fr 1.6fr;
     gap: clamp(2rem, 5vw, 4rem);
   }
 
@@ -246,8 +450,10 @@ const steps = [
   }
 
   .principles dt {
+    display: grid;
+    gap: 0.4rem;
     font-weight: 600;
-    margin-bottom: 0.4rem;
+    margin-bottom: 0.45rem;
   }
 
   .principles dd {
@@ -255,54 +461,72 @@ const steps = [
     color: var(--ink-2);
   }
 
-  .projects {
+  .people {
     list-style: none;
     margin: 0;
     padding: 0;
     border-top: 1px solid var(--ink);
   }
 
-  .projects li {
+  .people li {
     display: grid;
-    grid-template-columns: 14rem 1fr;
+    grid-template-columns: 1.5fr 1fr auto;
+    align-items: baseline;
     gap: 1rem;
-    padding-block: 1rem;
+    padding-block: 1.1rem;
     border-bottom: 1px solid var(--rule);
   }
 
-  .projects a {
-    font-weight: 600;
-    text-decoration: none;
+  .person {
+    font-family: var(--serif);
+    font-size: 1.45rem;
   }
 
-  .projects p {
-    color: var(--ink-2);
+  @media (max-width: 64rem) {
+    .bento {
+      grid-template-columns: 1fr;
+    }
+
+    .field {
+      min-height: 0;
+    }
   }
 
   @media (max-width: 56rem) {
-    .hero,
-    .two-col {
+    .hero-grid,
+    .ai-grid,
+    .numbers,
+    .two-col,
+    .products {
       grid-template-columns: 1fr;
     }
 
-    .fields {
-      grid-template-columns: 1fr;
+    .hero-grid {
+      min-height: 0;
     }
 
-    .field,
-    .field + .field {
-      border-left: 0;
-      padding: 1.5rem 0;
-      border-bottom: 1px solid var(--rule);
+    .hero-visual {
+      max-width: 26rem;
+      width: 100%;
+      justify-self: center;
     }
 
     .principles {
       grid-template-columns: 1fr;
     }
+  }
 
-    .projects li {
+  @media (max-width: 30rem) {
+    .tiles {
       grid-template-columns: 1fr;
-      gap: 0.25rem;
+    }
+
+    .people li {
+      grid-template-columns: 1fr auto;
+    }
+
+    .people .label {
+      grid-row: 2;
     }
   }
 </style>

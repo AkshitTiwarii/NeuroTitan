@@ -1,0 +1,328 @@
+---
+/**
+ * Live tokenizer. Uses the real BPE vocabularies from the gpt-tokenizer package
+ * (MIT), loaded only when the playground scrolls into view. Runs entirely in
+ * the browser; the text is never sent anywhere.
+ *
+ * The presets say the same thing in three languages. The Odia and Hindi lines
+ * were written by the team; gg to confirm the wording before launch.
+ */
+const presets = [
+  { id: "en", label: "English", text: "Language models read text as tokens, not as words." },
+  { id: "hi", label: "हिन्दी", text: "भाषा मॉडल पाठ को शब्दों के रूप में नहीं, टोकन के रूप में पढ़ते हैं।" },
+  { id: "or", label: "ଓଡ଼ିଆ", text: "ଭାଷା ମଡେଲ ପାଠକୁ ଶବ୍ଦ ଭାବରେ ନୁହେଁ, ଟୋକେନ ଭାବରେ ପଢ଼େ।" },
+  { id: "py", label: "Python", text: "def attention(q, k, v):\n    return softmax(q @ k.T / sqrt(d)) @ v" },
+];
+---
+
+<div class="playground card" id="playground" data-playground>
+  <div class="bar">
+    <p class="label label--red">Live tokenizer</p>
+    <label class="enc">
+      <span class="label">Vocabulary</span>
+      <select data-encoding>
+        <option value="o200k_base">o200k_base (GPT-4o family)</option>
+        <option value="cl100k_base">cl100k_base (GPT-4, GPT-3.5)</option>
+        <option value="r50k_base">r50k_base (GPT-2, GPT-3)</option>
+      </select>
+    </label>
+  </div>
+
+  <div class="presets" role="group" aria-label="Example sentences">
+    {presets.map((p) => <button type="button" data-preset={p.text}>{p.label}</button>)}
+  </div>
+
+  <label class="visually-hidden" for="tok-input">Text to tokenize</label>
+  <textarea id="tok-input" data-input rows="3" spellcheck="false">{presets[0].text}</textarea>
+
+  <div class="stats" aria-live="polite">
+    <div><span class="label">Tokens</span><strong data-count>—</strong></div>
+    <div><span class="label">Characters</span><strong data-chars>—</strong></div>
+    <div><span class="label">Chars / token</span><strong data-ratio>—</strong></div>
+    <p class="status label" data-status>Loads when you scroll here</p>
+  </div>
+
+  <div class="tokens" data-tokens role="group" aria-label="Tokens"></div>
+
+  <div class="compare">
+    <button type="button" class="button button--ghost" data-compare>Compare all three vocabularies</button>
+    <table data-compare-table hidden>
+      <thead><tr><th>Vocabulary</th><th>Size</th><th>Tokens for this text</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <p class="foot">
+    Runs in your browser with the published vocabularies. Nothing you type is sent anywhere. A box marked
+    <span class="byte-key">byte</span> is a token that holds only part of a character: scripts that a vocabulary saw
+    less often in training get split into bytes.
+  </p>
+</div>
+
+<script>
+  type Enc = { encode: (t: string) => number[]; decode: (ids: number[]) => string };
+  const loaders: Record<string, () => Promise<Enc>> = {
+    o200k_base: () => import("gpt-tokenizer/encoding/o200k_base"),
+    cl100k_base: () => import("gpt-tokenizer/encoding/cl100k_base"),
+    r50k_base: () => import("gpt-tokenizer/encoding/r50k_base"),
+  };
+  const SIZES: Record<string, string> = { o200k_base: "≈200k", cl100k_base: "≈100k", r50k_base: "≈50k" };
+  const cache = new Map<string, Promise<Enc>>();
+  const load = (name: string) => {
+    if (!cache.has(name)) cache.set(name, loaders[name]());
+    return cache.get(name)!;
+  };
+
+  const root = document.querySelector<HTMLElement>("[data-playground]");
+  if (root) {
+    const input = root.querySelector<HTMLTextAreaElement>("[data-input]")!;
+    const select = root.querySelector<HTMLSelectElement>("[data-encoding]")!;
+    const out = root.querySelector<HTMLElement>("[data-tokens]")!;
+    const status = root.querySelector<HTMLElement>("[data-status]")!;
+    const count = root.querySelector<HTMLElement>("[data-count]")!;
+    const chars = root.querySelector<HTMLElement>("[data-chars]")!;
+    const ratio = root.querySelector<HTMLElement>("[data-ratio]")!;
+    const table = root.querySelector<HTMLTableElement>("[data-compare-table]")!;
+    let started = false;
+    let seq = 0;
+
+    async function render() {
+      const my = ++seq;
+      const name = select.value;
+      status.textContent = cache.has(name) ? "" : "Loading vocabulary…";
+      const enc = await load(name);
+      if (my !== seq) return;
+      status.textContent = "";
+      const text = input.value;
+      const ids = enc.encode(text);
+      const n = [...text].length;
+      count.textContent = String(ids.length);
+      chars.textContent = String(n);
+      ratio.textContent = ids.length ? (n / ids.length).toFixed(2) : "—";
+      const frag = document.createDocumentFragment();
+      ids.forEach((id, i) => {
+        const piece = enc.decode([id]);
+        const span = document.createElement("span");
+        span.className = `tok t${i % 4}`;
+        span.title = `token id ${id}`;
+        if (piece.includes("�")) {
+          span.classList.add("byte");
+          span.textContent = "byte";
+        } else {
+          span.textContent = piece.replace(/ /g, "·").replace(/\n/g, "↵");
+        }
+        frag.appendChild(span);
+      });
+      out.replaceChildren(frag);
+      if (!table.hidden) compare();
+    }
+
+    async function compare() {
+      table.hidden = false;
+      const body = table.tBodies[0];
+      const rows = await Promise.all(
+        Object.keys(loaders).map(async (name) => {
+          const enc = await load(name);
+          return [name, SIZES[name], enc.encode(input.value).length] as const;
+        }),
+      );
+      body.replaceChildren(
+        ...rows.map(([name, size, n]) => {
+          const tr = document.createElement("tr");
+          for (const v of [name, size, String(n)]) {
+            const td = document.createElement("td");
+            td.textContent = v;
+            tr.appendChild(td);
+          }
+          return tr;
+        }),
+      );
+    }
+
+    function start() {
+      if (started) return;
+      started = true;
+      render();
+    }
+
+    let t: number | undefined;
+    input.addEventListener("input", () => {
+      start();
+      clearTimeout(t);
+      t = window.setTimeout(render, 120);
+    });
+    select.addEventListener("change", () => { start(); render(); });
+    root.querySelectorAll<HTMLButtonElement>("[data-preset]").forEach((b) =>
+      b.addEventListener("click", () => {
+        input.value = b.dataset.preset ?? "";
+        start();
+        render();
+      }),
+    );
+    root.querySelector("[data-compare]")!.addEventListener("click", () => { start(); compare(); });
+    new IntersectionObserver(([e], io) => {
+      if (e.isIntersecting) { start(); io.disconnect(); }
+    }, { rootMargin: "200px" }).observe(root);
+  }
+</script>
+
+<style>
+  .playground {
+    display: grid;
+    gap: 1.1rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .bar {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  .enc {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+  }
+
+  select,
+  textarea,
+  .presets button {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+
+  select {
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    padding: 0.4rem 0.5rem;
+  }
+
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .presets button {
+    font-size: 0.875rem;
+    padding: 0.35rem 0.75rem;
+    cursor: pointer;
+  }
+
+  .presets button:hover {
+    border-color: var(--red);
+    color: var(--red);
+  }
+
+  textarea {
+    width: 100%;
+    resize: vertical;
+    padding: 0.85rem 1rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+  }
+
+  textarea:focus {
+    outline: 2px solid var(--red);
+    outline-offset: 0;
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: end;
+    gap: 1.75rem;
+  }
+
+  .stats div {
+    display: grid;
+    gap: 0.15rem;
+  }
+
+  .stats strong {
+    font-family: var(--mono);
+    font-size: 1.75rem;
+    font-weight: 500;
+    line-height: 1;
+  }
+
+  .stats div:first-child strong {
+    color: var(--red);
+  }
+
+  .status {
+    margin-left: auto;
+  }
+
+  .tokens {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    min-height: 3rem;
+    padding: 0.85rem;
+    background: var(--paper-2);
+    border: 1px solid var(--rule);
+    font-family: var(--mono);
+    font-size: 0.9375rem;
+  }
+
+  .tokens :global(.tok) {
+    padding: 0.1rem 0.3rem;
+    white-space: pre;
+    border: 1px solid transparent;
+  }
+
+  .tokens :global(.t0) { background: #e9d6d2; color: #151515; }
+  .tokens :global(.t1) { background: #d9dadd; color: #151515; }
+  .tokens :global(.t2) { background: #ebe3cf; color: #151515; }
+  .tokens :global(.t3) { background: #d3dccf; color: #151515; }
+
+  .tokens :global(.byte),
+  .byte-key {
+    background: transparent;
+    border: 1px dashed var(--red);
+    color: var(--red);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-family: var(--mono);
+    padding: 0.1rem 0.3rem;
+  }
+
+  .compare {
+    display: grid;
+    gap: 0.85rem;
+    justify-items: start;
+  }
+
+  table {
+    border-collapse: collapse;
+    font-family: var(--mono);
+    font-size: 0.875rem;
+    min-width: min(100%, 26rem);
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.45rem 0.9rem 0.45rem 0;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  th {
+    font-weight: 500;
+    color: var(--grey);
+    border-bottom-color: var(--ink);
+  }
+
+  .foot {
+    font-size: 0.875rem;
+    color: var(--grey);
+    max-width: 46rem;
+  }
+</style>

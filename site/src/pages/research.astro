@@ -7,9 +7,10 @@ import { FIELDS } from "../data/site";
   title="Research"
   description="What NeuroTitan Labs studies in machine learning, semiconductor design and quantum computing, the tools we use, and how results are checked."
 >
-  <header class="wrap page-head">
+  <section class="t-graphite page-hero">
+    <div class="wrap page-head">
     <p class="label label--red">Research</p>
-    <h1>What we study and how we check it</h1>
+    <h1 class="display">What we study and how we check it.</h1>
     <p class="lede">
       Three fields, one rule: a result is not finished until someone other than its author has rerun it from the
       published code and got the same numbers.
@@ -17,7 +18,8 @@ import { FIELDS } from "../data/site";
     <nav class="jump" aria-label="Fields on this page">
       {FIELDS.map((f) => <a href={`#${f.id}`}>{f.index} {f.name}</a>)}
     </nav>
-  </header>
+    </div>
+  </section>
 
   {
     FIELDS.map((f) => (
@@ -36,6 +38,11 @@ import { FIELDS } from "../data/site";
                 {f.tools.map((t) => <li>{t}</li>)}
               </ul>
             </div>
+            {f.href.startsWith("/") && !f.href.includes("#") && (
+              <p>
+                <a class="button button--ghost" href={f.href}>Open the {f.name.toLowerCase()} page →</a>
+              </p>
+            )}
             <p class="status">
               <span class="label">Status</span> First experiments are in progress. Results will appear on the{" "}
               <a href="/blog">blog</a> with their code.
@@ -48,16 +55,12 @@ import { FIELDS } from "../data/site";
 </Base>
 
 <style>
-  .page-head {
-    display: grid;
-    gap: 1.25rem;
-    padding-block: clamp(3rem, 8vw, 5.5rem) clamp(2.5rem, 5vw, 3.5rem);
+  .page-hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
   }
 
-  h1 {
-    font-size: clamp(2.25rem, 5vw, 3.75rem);
-    max-width: 20ch;
-  }
+
 
   .jump {
     display: flex;

@@ -7,7 +7,6 @@
 import "../styles/global.css";
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-import PaletteSwitcher from "../components/PaletteSwitcher.astro";
 import { SITE } from "../data/site";
 
 interface Props {
@@ -56,7 +55,7 @@ const orgLd = {
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
     <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
-    <meta name="theme-color" content="#f5f3ef" />
+    <meta name="theme-color" content="#0f0f0f" />
     <link rel="alternate" type="application/rss+xml" title={`${SITE.name} blog`} href="/rss.xml" />
     <link rel="sitemap" href="/sitemap-index.xml" />
 
@@ -83,6 +82,36 @@ const orgLd = {
       <slot />
     </main>
     <Footer />
-    {import.meta.env.DEV && <PaletteSwitcher />}
+    <script>
+      // Scroll reveal. Anything at or above the reveal line is shown, so fast scrolls and
+      // anchor jumps can never leave a section hidden. Without JS, nothing is hidden at all.
+      const pending = new Set(document.querySelectorAll<HTMLElement>("[data-reveal]"));
+      const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+      if (!reduce && pending.size) {
+        const check = () => {
+          const line = innerHeight * 0.92;
+          for (const el of pending) {
+            if (el.getBoundingClientRect().top < line) {
+              el.classList.add("is-in");
+              pending.delete(el);
+            }
+          }
+          if (!pending.size) removeEventListener("scroll", onScroll);
+        };
+        let queued = false;
+        const onScroll = () => {
+          if (queued) return;
+          queued = true;
+          requestAnimationFrame(() => {
+            queued = false;
+            check();
+          });
+        };
+        check(); // reveal what is on screen before hiding anything
+        document.documentElement.classList.add("js");
+        addEventListener("scroll", onScroll, { passive: true });
+        addEventListener("resize", onScroll, { passive: true });
+      }
+    </script>
   </body>
 </html>

@@ -1,20 +1,38 @@
 ---
 import Base from "../layouts/Base.astro";
-import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PRINCIPLES, SITE } from "../data/site";
+import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PILLARS, PRINCIPLES, SITE } from "../data/site";
 ---
 
 <Base
   title="About"
   description="Who runs NeuroTitan Labs, the standards every result is held to, and how to reach us."
 >
-  <header class="wrap page-head">
+  <section class="t-graphite page-hero">
+    <div class="wrap page-head">
     <p class="label label--red">About</p>
-    <h1>A small lab that shows its work</h1>
+    <h1 class="display">A small lab that shows its work.</h1>
     <p class="lede">
       NeuroTitan Labs is an independent research lab working across machine learning, chip design and quantum
       computing. We publish experiments, reproductions and designs, each with the code and data behind it.
     </p>
-  </header>
+    </div>
+  </section>
+
+  <section class="section dots">
+    <div class="wrap">
+      <div class="pillars">
+        {
+          PILLARS.map((p, i) => (
+            <article class="card" data-reveal>
+              <span class="label label--red">{String(i + 1).padStart(2, "0")}</span>
+              <h2>{p.title}</h2>
+              <p>{p.body}</p>
+            </article>
+          ))
+        }
+      </div>
+    </div>
+  </section>
 
   <section class="section">
     <div class="wrap two-col">
@@ -82,15 +100,32 @@ import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PRINCIPLES, SITE } from "../data/site";
 </Base>
 
 <style>
-  .page-head {
-    display: grid;
-    gap: 1.25rem;
-    padding-block: clamp(3rem, 8vw, 5.5rem) clamp(2.5rem, 5vw, 3.5rem);
+  .page-hero {
+    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
+    background-size: 22px 22px;
   }
 
-  h1 {
-    font-size: clamp(2.25rem, 5vw, 3.75rem);
-    max-width: 18ch;
+
+
+  .pillars {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+
+  .pillars article {
+    display: grid;
+    gap: 0.7rem;
+    align-content: start;
+    padding: 1.6rem;
+  }
+
+  .pillars h2 {
+    font-size: 1.7rem;
+  }
+
+  .pillars p {
+    color: var(--ink-2);
   }
 
   .two-col {
@@ -158,6 +193,7 @@ import { CAMPUS_AMBASSADOR_FORM, PEOPLE, PRINCIPLES, SITE } from "../data/site";
   }
 
   @media (max-width: 56rem) {
+    .pillars,
     .two-col {
       grid-template-columns: 1fr;
     }

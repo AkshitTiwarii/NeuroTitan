@@ -87,3 +87,4 @@ site/dist/
 # Local env files, never committed
 .env
 .env.*
+site/src/.astro/
