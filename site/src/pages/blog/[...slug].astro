@@ -1,6 +1,7 @@
 ---
 import { render } from "astro:content";
 import "katex/dist/katex.min.css";
+import "../../styles/electron-explorer.css";
 import Base from "../../layouts/Base.astro";
 import { formatDate, getPublishedPosts, type Post } from "../../lib/posts";
 import { SITE } from "../../data/site";
@@ -77,6 +78,11 @@ const jsonLd = {
     </footer>
   </article>
 </Base>
+
+<script>
+  // Interactive figures in posts mount into placeholders written in the Markdown; no-op elsewhere.
+  import "../../scripts/electron-explorer";
+</script>
 
 <style>
   .post-head {
