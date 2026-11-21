@@ -15,6 +15,7 @@ const year = new Date().getFullYear();
     <div class="about">
       <a class="brand" href="/" aria-label="NeuroTitan Labs, home"><Mark size={28} /></a>
       <p class="name">NeuroTitan Labs</p>
+      <p class="founder">Founded by {SITE.founder}</p>
       <p class="muted">Machine learning, semiconductors and quantum computing. Code and data with every result.</p>
     </div>
     <nav aria-label="Footer">
@@ -35,7 +36,7 @@ const year = new Date().getFullYear();
   </div>
 
   <div class="wrap base">
-    <p>© {year} NeuroTitan Labs</p>
+    <p>© {year} NeuroTitan Labs · Founder: {SITE.founder}</p>
     <p><a href="/privacy">Privacy</a></p>
   </div>
 </footer>
@@ -77,6 +78,12 @@ const year = new Date().getFullYear();
     font-family: var(--serif);
     font-size: 1.375rem;
     margin-bottom: 0.4rem;
+  }
+
+  .founder {
+    font-size: 0.9375rem;
+    color: var(--ink-2);
+    margin-bottom: 0.6rem;
   }
 
   .muted {

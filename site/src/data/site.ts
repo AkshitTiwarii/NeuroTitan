@@ -12,6 +12,7 @@ export const SITE = {
   email: "neurotitancontact@gmail.com",
   github: "https://github.com/NeuroTitan-Hub",
   githubOrg: "NeuroTitan-Hub",
+  founder: "Satyabrat Sahu",
 } as const;
 
 export const NAV = [
