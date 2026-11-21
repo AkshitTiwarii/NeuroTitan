@@ -3,6 +3,7 @@ title: "What does a sentence cost in electrons?"
 description: "One sentence, 204 languages, followed from tokens to arithmetic to transistors on open silicon, with every formula derived and every number traceable."
 field: AI
 date: 2026-11-22
+updated: 2026-11-22
 authors: ["Satyabrat Sahu"]
 repo: "https://github.com/NeuroTitan-Hub/sentence-cost-in-electrons"
 draft: false
@@ -492,7 +493,7 @@ Since $0 \le s \le 1$, $G$ lies between $r$ and $r^2$.
 
 - **Alone, with short text:** weight reads are 97.5 to 98.4% of the energy, so $s$ is near zero and the energy gap equals the token gap. Odia costs 9.75× English, against a token ratio of 9.70×.
 - **On a server shared with 64 users:** the weight reads are split 64 ways, $s$ grows, and the gap grows faster than the token gap.
-- **A page of text and a short answer:** Odia rises to 16.5× ($s = 0.08$). Across the prompt lengths and memory budgets we tried, it ranges from 13.9 to 31.5×.
+- **A page of text and a short answer:** Odia rises to 16.5× ($s = 0.08$). Across the three multiply-add energies and three memory energies we tried, and the token count's 95% interval, it ranges from 13.9 to 31.5×.
 - **A long document:** Odia reaches 24× ($s = 0.17$), with a range of 21 to 63×.
 
 ![Energy ratio to English against token ratio, alone and on a busy server, with the curves y = r and y = r squared as bounds.](/blog/sentence-cost-in-electrons/fig-6-gap.svg)
@@ -516,7 +517,11 @@ where $d_i$ is the difference between language $i$'s predicted and measured rank
 - **No modern process.** 130 nm open silicon, and published memory figures from 2014 to 2020.
 - **Our multiply-add and SRAM numbers are floors.** Gates, wires, decoders and sense amplifiers are missing.
 - **We measured the English prompt only.** Other languages are scaled by our FLORES ratio.
-- **The interactive explorer covers arithmetic only.** Memory traffic and the busy-server case come in an update.
+- **The explorer's server mode uses published energies** (45 nm arithmetic, GDDR6 memory), not our sky130 simulations, and shows energy, not electrons, because we do not model a GPU's supply voltages.
+
+## Updates
+
+- **22 November 2026.** Corrected section 8: the 13.9 to 31.5× range for Odia covers the multiply-add and memory energies we tried and the token count's 95% interval. It does not cover prompt lengths and memory budgets, as we first wrote. Added the explorer's second mode, the whole request on a GPU server. Read the abstracts of Seevinck et al. and Pelgrom et al., and checked our 8.3× and 179× against Deng et al.'s abstract, which gives the same figures.
 
 ## Sources
 
@@ -525,8 +530,8 @@ where $d_i$ is the difference between language $i$'s predicted and measured rank
 - Horowitz, "Computing's energy problem (and what we can do about it)", ISSCC 2014, DOI 10.1109/ISSCC.2014.6757323.
 - O'Connor et al., "Fine-Grained DRAM", MICRO 2017, DOI 10.1145/3123939.3124545.
 - Micron GDDR6X figures via Tom's Hardware, 2020-09-06 (vendor claim).
-- Seevinck, List, Lohstroh, "Static-noise margin analysis of MOS SRAM cells", IEEE JSSC 22, 748-754, 1987, DOI 10.1109/JSSC.1987.1052809. (We confirmed the bibliographic record but have not yet read the paper. We use it only for the standard definition of the static noise margin.)
-- Pelgrom, Duinmaijer, Welbers, "Matching properties of MOS transistors", IEEE JSSC 1989, DOI 10.1109/JSSC.1989.572629. (Index records disagree on the venue and pages, and we have not yet read the paper. We use it only for the standard mismatch law.)
+- Seevinck, List, Lohstroh, "Static-noise margin analysis of MOS SRAM cells", IEEE Journal of Solid-State Circuits 22(5), 748-754, October 1987, DOI 10.1109/JSSC.1987.1052809. We read the abstract (IEEE Xplore, 2026-11-22): the paper derives the static noise margin analytically and gives a way to simulate it. The largest-square construction we quote is the standard form of their definition. It is in the body of the paper, which we have not read.
+- Pelgrom, Duinmaijer, Welbers, "Matching properties of MOS transistors", IEEE Journal of Solid-State Circuits 24(5), 1433-1439, October 1989, DOI 10.1109/JSSC.1989.572629 (details from Crossref). We read the abstract (IEEE Xplore, 2026-11-22): the paper analyses and measures threshold-voltage mismatch. The area law we quote is the standard form of their result. It is in the body of the paper, which we have not read.
 - NLLB Team / Meta, FLORES-200, CC BY-SA 4.0. Belebele (facebook/belebele), CC BY-SA 4.0.
 - SkyWater SKY130 PDK; ngspice 47.
 - NVIDIA L40S product page, opened 2026-11-19.

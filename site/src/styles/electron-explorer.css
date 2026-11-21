@@ -33,6 +33,21 @@
 .ee-ends { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--grey); }
 .ee-result { font-size: 1rem; color: var(--ink); }
 .ee-formula { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-2); overflow-wrap: anywhere; }
+.ee-tabs { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.ee-tab {
+  font: inherit; font-size: 0.875rem; padding: 0.45rem 0.8rem; border-radius: 999px; cursor: pointer;
+  border: 1px solid var(--rule); background: var(--paper); color: var(--ink-2);
+}
+.ee-tab[aria-pressed="true"] { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+.ee-tab:focus-visible, .ee-control select:focus-visible { outline: 2px solid var(--red); outline-offset: 2px; }
+.ee-box { display: grid; gap: 1rem; }
+.ee-box[hidden] { display: none; }
+.ee-bar { display: flex; gap: 2px; height: 14px; border-radius: 3px; overflow: hidden; transition: width 300ms ease; }
+.ee-seg { flex-basis: 0; min-width: 0; transition: flex-grow 300ms ease; }
+.ee-shares { font-size: 0.8rem; color: var(--grey); margin-top: 0.5rem !important; }
+.ee-seglegend { display: flex; flex-wrap: wrap; gap: 0.4rem 1.1rem; font-size: 0.85rem; color: var(--ink-2); }
+.ee-seglegend > span { display: inline-flex; align-items: center; gap: 0.4rem; }
+@media (prefers-reduced-motion: reduce) { .ee-bar, .ee-seg { transition: none; } }
 @media (max-width: 40rem) {
   .ee-controls, .ee-panels { grid-template-columns: 1fr; }
 }
