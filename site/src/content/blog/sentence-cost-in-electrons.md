@@ -2,7 +2,7 @@
 title: "What does a sentence cost in electrons?"
 description: "One sentence, 204 languages, followed from tokens to arithmetic to transistors on open silicon, with every formula derived and every number traceable."
 field: AI
-date: 2026-11-24
+date: 2026-11-22
 authors: ["Satyabrat Sahu"]
 repo: "https://github.com/NeuroTitan-Hub/sentence-cost-in-electrons"
 draft: false
