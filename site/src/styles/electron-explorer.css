@@ -1,0 +1,38 @@
+/* Electron explorer (blog). Uses the site's theme tokens; dot colours are the figure palette. */
+.ee {
+  border: 1px solid var(--rule);
+  background: var(--paper-2);
+  padding: clamp(1rem, 3vw, 1.5rem);
+  border-radius: 6px;
+  font-family: var(--sans);
+  font-size: 0.95rem;
+  display: grid;
+  gap: 1rem;
+}
+.ee p { margin: 0; }
+.ee-title { font-family: var(--serif); font-size: 1.35rem; line-height: 1.2; }
+.ee-intro, .ee-note { color: var(--ink-2); }
+.ee-note { font-size: 0.85rem; color: var(--grey); }
+.ee-controls { display: grid; gap: 0.9rem; grid-template-columns: 1fr 1fr; align-items: end; }
+.ee-control { display: grid; gap: 0.35rem; font-size: 0.875rem; color: var(--ink-2); }
+.ee-control select {
+  font: inherit; font-size: 0.95rem; color: var(--ink); background: var(--paper);
+  border: 1px solid var(--rule); border-radius: 4px; padding: 0.45rem 0.5rem;
+}
+.ee-control input[type="range"] { width: 100%; accent-color: var(--ink); }
+.ee-check { grid-column: 1 / -1; display: flex; gap: 0.5rem; align-items: center; font-size: 0.875rem; color: var(--ink-2); }
+.ee-check input { accent-color: var(--ink); width: 1rem; height: 1rem; }
+.ee-panels { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+.ee-panel { background: var(--paper); border: 1px solid var(--rule); border-radius: 4px; padding: 0.85rem; overflow-x: auto; }
+.ee-lang { display: flex; align-items: center; gap: 0.5rem; font-weight: 600; margin-bottom: 0.6rem !important; }
+.ee-swatch { width: 0.7rem; height: 0.7rem; border-radius: 50%; display: inline-block; flex: none; }
+.ee-stats { display: grid; grid-template-columns: auto 1fr; gap: 0.2rem 0.75rem; margin: 0 0 0.75rem; font-size: 0.875rem; }
+.ee-stats dt { color: var(--grey); }
+.ee-stats dd { margin: 0; font-variant-numeric: tabular-nums; text-align: right; color: var(--ink); }
+.ee-dots { display: block; color: var(--rule); max-width: 100%; height: auto; }
+.ee-ends { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--grey); }
+.ee-result { font-size: 1rem; color: var(--ink); }
+.ee-formula { font-family: var(--mono); font-size: 0.8rem; color: var(--ink-2); overflow-wrap: anywhere; }
+@media (max-width: 40rem) {
+  .ee-controls, .ee-panels { grid-template-columns: 1fr; }
+}

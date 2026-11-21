@@ -1,6 +1,8 @@
 // @ts-check
 import { defineConfig } from "astro/config";
 import sitemap from "@astrojs/sitemap";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
 
 export default defineConfig({
   site: "https://neurotitan.in",
@@ -19,5 +21,9 @@ export default defineConfig({
   integrations: [sitemap()],
   markdown: {
     shikiConfig: { theme: "github-light" },
+    // Maths typeset at build time: posts ship static HTML plus MathML for screen readers,
+    // no maths script runs in the browser. KaTeX's CSS and fonts are bundled from npm (font-src 'self').
+    remarkPlugins: [remarkMath],
+    rehypePlugins: [[rehypeKatex, { output: "htmlAndMathml", throwOnError: true }]],
   },
 });

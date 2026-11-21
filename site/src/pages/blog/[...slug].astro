@@ -1,5 +1,7 @@
 ---
 import { render } from "astro:content";
+import "katex/dist/katex.min.css";
+import "../../styles/electron-explorer.css";
 import Base from "../../layouts/Base.astro";
 import { formatDate, getPublishedPosts, type Post } from "../../lib/posts";
 import { SITE } from "../../data/site";
@@ -25,7 +27,9 @@ const jsonLd = {
   description,
   datePublished: date.toISOString(),
   dateModified: (updated ?? date).toISOString(),
-  author: authors.map((name) => ({ "@type": "Person", name })),
+  author: authors.map((name) =>
+    name === SITE.name ? { "@type": "Organization", name, url: SITE.url } : { "@type": "Person", name },
+  ),
   publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
   mainEntityOfPage: url,
   ...(repo ? { codeRepository: repo } : {}),
@@ -51,7 +55,7 @@ const jsonLd = {
       <h1>{title}</h1>
       <p class="lede">{description}</p>
       <p class="byline">
-        By {authors.join(", ")}
+        By {authors.join(", ")}{!authors.includes(SITE.name) && ` with ${SITE.name}`}
         {
           repo && (
             <>
@@ -74,6 +78,11 @@ const jsonLd = {
     </footer>
   </article>
 </Base>
+
+<script>
+  // Interactive figures in posts mount into placeholders written in the Markdown; no-op elsewhere.
+  import "../../scripts/electron-explorer";
+</script>
 
 <style>
   .post-head {
@@ -181,6 +190,17 @@ const jsonLd = {
     border-left: 2px solid var(--red);
     padding-left: 1rem;
     color: var(--ink-2);
+  }
+
+  /* Display equations scroll sideways on narrow screens instead of overflowing the page. */
+  .prose :global(.katex-display) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25em;
+  }
+
+  .prose :global(.katex) {
+    font-size: 1.05em;
   }
 
   .prose :global(img) {
