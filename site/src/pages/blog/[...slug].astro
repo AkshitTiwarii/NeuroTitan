@@ -26,7 +26,9 @@ const jsonLd = {
   description,
   datePublished: date.toISOString(),
   dateModified: (updated ?? date).toISOString(),
-  author: authors.map((name) => ({ "@type": "Person", name })),
+  author: authors.map((name) =>
+    name === SITE.name ? { "@type": "Organization", name, url: SITE.url } : { "@type": "Person", name },
+  ),
   publisher: { "@type": "Organization", name: SITE.name, url: SITE.url },
   mainEntityOfPage: url,
   ...(repo ? { codeRepository: repo } : {}),
@@ -52,7 +54,7 @@ const jsonLd = {
       <h1>{title}</h1>
       <p class="lede">{description}</p>
       <p class="byline">
-        By {authors.join(", ")}
+        By {authors.join(", ")}{!authors.includes(SITE.name) && ` with ${SITE.name}`}
         {
           repo && (
             <>
