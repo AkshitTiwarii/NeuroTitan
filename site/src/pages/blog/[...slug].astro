@@ -1,5 +1,6 @@
 ---
 import { render } from "astro:content";
+import "katex/dist/katex.min.css";
 import Base from "../../layouts/Base.astro";
 import { formatDate, getPublishedPosts, type Post } from "../../lib/posts";
 import { SITE } from "../../data/site";
@@ -181,6 +182,17 @@ const jsonLd = {
     border-left: 2px solid var(--red);
     padding-left: 1rem;
     color: var(--ink-2);
+  }
+
+  /* Display equations scroll sideways on narrow screens instead of overflowing the page. */
+  .prose :global(.katex-display) {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-block: 0.25em;
+  }
+
+  .prose :global(.katex) {
+    font-size: 1.05em;
   }
 
   .prose :global(img) {
