@@ -5,7 +5,7 @@ field: AI
 date: 2026-11-22
 updated: 2026-11-22
 authors: ["Satyabrat Sahu"]
-repo: "https://github.com/NeuroTitan-Hub/sentence-cost-in-electrons"
+repo: "https://github.com/NeuroTitan-Hub/Sentence-cost-in-Electron"
 draft: false
 ---
 
@@ -701,7 +701,7 @@ over the samples between $t_0$ and $t_1$. Splitting the sum at the first generat
 | Khmer | 3,944 | 5.41 | 6.90 kJ | 6.41 | 1.85 J |
 | Shan | 5,604 | 7.69 | 8.46 kJ | 7.86 | 1.69 J |
 
-Nine of the 18 languages are shown; the rest are in the [code and data](https://github.com/NeuroTitan-Hub/sentence-cost-in-electrons).
+Nine of the 18 languages are shown; the rest are in the [code and data](https://github.com/NeuroTitan-Hub/Sentence-cost-in-Electron).
 
 - **Energy against tokens.** Across all 18 languages, the slope of log energy ratio against log token ratio is 0.997, and the rank correlation is 0.94.
 - **Per generated token.** Energy ranges from 1.32 to 1.98 J. A straight-line fit against context length has slope $(1.8 \pm 2.4) \times 10^{-5}$ J per token of context ($R^2 = 0.03$): no measurable growth over 1,000 to 8,000 tokens.
@@ -794,7 +794,7 @@ where $d_i$ is the difference between language $i$'s predicted and measured rank
 
 ## Reproducibility
 
-All code and data are at [github.com/NeuroTitan-Hub/sentence-cost-in-electrons](https://github.com/NeuroTitan-Hub/sentence-cost-in-electrons), under MIT for code and CC BY-SA 4.0 for data.
+All code and data are at [github.com/NeuroTitan-Hub/Sentence-cost-in-Electron](https://github.com/NeuroTitan-Hub/Sentence-cost-in-Electron), under MIT for code and CC BY-SA 4.0 for data.
 
 One script, `m6/popper_check.py`, recomputes every number in this post from the data files. The analysis steps (operation counts, the server model, the whole chain) rerun in seconds. The circuit simulations need ngspice 47 and the sky130 PDK, at the versions given in the repository.
 
