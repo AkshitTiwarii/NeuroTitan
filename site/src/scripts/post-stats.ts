@@ -62,7 +62,7 @@ function show(root: ParentNode, name: string, text: string | null) {
 
 function paint(row: Row) {
   document.querySelectorAll<HTMLElement>(`[data-stats-slug="${row.slug}"]`).forEach((root) => {
-    show(root, "views", plural(row.views, "view", "views"));
+    show(root, "views", row.views > 0 ? plural(row.views, "view", "views") : null);
     const avg = row.read_samples >= STATS.minReadSamples ? Math.round(row.read_seconds / row.read_samples / 60) : null;
     show(root, "avgread", avg === null ? null : `avg. ${Math.max(1, avg)} min spent reading`);
     const t = total(row.reactions);
@@ -110,13 +110,13 @@ function setupReactions(bar: HTMLElement, slug: string, counts: Record<string, n
 }
 
 // ---- one view per post per day ----
-function countView(slug: string) {
+async function countView(slug: string): Promise<void> {
   if (dnt) return;
   const key = `nt-view:${slug}`;
   const today = new Date().toISOString().slice(0, 10);
   if (load(key) === today) return;
   save(key, today);
-  void rpc("blog_view", { p_slug: slug });
+  await rpc("blog_view", { p_slug: slug });
 }
 
 // ---- measured reading time: only while the tab is visible and the reader was active in the last minute ----
@@ -152,7 +152,8 @@ async function main() {
   const slugs = Array.from(new Set(roots.map((r) => r.dataset.statsSlug!)));
   const post = document.querySelector<HTMLElement>("[data-post-slug]")?.dataset.postSlug;
   if (post) {
-    countView(post);
+    // Wait for this visit to be saved so the count shown includes it.
+    await countView(post);
     measureReading(post);
   }
   if (!slugs.length) return;
