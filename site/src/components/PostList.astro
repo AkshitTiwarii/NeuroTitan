@@ -1,5 +1,6 @@
 ---
 import { formatDate, type Post } from "../lib/posts";
+import { readingMinutes } from "../lib/reading-time";
 
 interface Props {
   posts: Post[];
@@ -20,10 +21,21 @@ const { posts } = Astro.props;
           <a href={`/blog/${post.id}`}>{post.data.title}</a>
         </h3>
         <p class="desc">{post.data.description}</p>
+        <p class="stats" data-stats-slug={post.id}>
+          <span>{readingMinutes(post.body)} min read</span>
+          <span data-stat="views" hidden />
+          <span data-stat="avgread" hidden />
+          <span data-stat="reactions" hidden />
+        </p>
       </li>
     ))
   }
 </ol>
+
+<script>
+  // Live view counts, reading time and reactions on each card (counters only).
+  import "../scripts/post-stats";
+</script>
 
 <style>
   .posts {
@@ -61,6 +73,19 @@ const { posts } = Astro.props;
 
   h3 a {
     text-decoration: none;
+  }
+
+  .stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 0;
+    font-size: 0.875rem;
+    color: var(--grey);
+  }
+
+  .stats > span:not([hidden]) + span:not([hidden])::before {
+    content: "·";
+    margin-inline: 0.5rem;
   }
 
   .desc {

@@ -1,0 +1,87 @@
+---
+import { REACTIONS } from "../data/stats";
+---
+
+<section class="reactions" data-reactions hidden aria-label="Reactions to this post">
+  <p class="label">Was this useful?</p>
+  <div class="buttons">
+    {
+      REACTIONS.map((r) => (
+        <button type="button" data-kind={r.kind} aria-pressed="false" title={r.label}>
+          <span class="emoji" aria-hidden="true">{r.emoji}</span>
+          <span class="name">{r.label}</span>
+          <span class="count" data-count />
+        </button>
+      ))
+    }
+  </div>
+  <p class="total" data-total aria-live="polite"></p>
+</section>
+
+<style>
+  .reactions {
+    display: grid;
+    gap: 0.75rem;
+    border-top: 1px solid var(--ink);
+    padding-top: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+  .reactions[hidden] {
+    display: none;
+  }
+  .buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    font: inherit;
+    font-family: var(--sans);
+    font-size: 0.9375rem;
+    color: var(--ink);
+    background: transparent;
+    border: 1px solid var(--rule);
+    border-radius: 999px;
+    padding: 0.4rem 0.85rem;
+    cursor: pointer;
+    transition: border-color 0.15s, background-color 0.15s, transform 0.15s;
+  }
+  button:hover {
+    border-color: var(--ink);
+  }
+  button:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 2px;
+  }
+  button[aria-pressed="true"] {
+    border-color: var(--red);
+    background: var(--red-soft);
+  }
+  button:active {
+    transform: scale(0.96);
+  }
+  .emoji {
+    font-size: 1.1rem;
+    line-height: 1;
+  }
+  .count {
+    font-family: var(--mono);
+    font-size: 0.85rem;
+    color: var(--ink-2);
+  }
+  .count:empty {
+    display: none;
+  }
+  .total {
+    font-size: 0.875rem;
+    color: var(--grey);
+  }
+  @media (prefers-reduced-motion: reduce) {
+    button {
+      transition: none;
+    }
+  }
+</style>

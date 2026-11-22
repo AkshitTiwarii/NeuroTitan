@@ -7,7 +7,7 @@ import { SITE } from "../data/site";
   <article class="wrap prose-page">
     <p class="label label--red">Privacy</p>
     <h1>What this site measures</h1>
-    <p class="updated label">Last updated 18 November 2026</p>
+    <p class="updated label">Last updated 22 November 2026</p>
 
     <h2>Analytics</h2>
     <p>
@@ -19,6 +19,20 @@ import { SITE } from "../data/site";
     <p>
       We do not record sessions, keystrokes or mouse movement. PostHog session recording and automatic click capture
       are switched off in our configuration.
+    </p>
+
+    <h2>Blog views, reading time and reactions</h2>
+    <p>
+      Blog posts show how many times they were opened, how long readers spend on them on average, and reactions.
+      These counts are kept in our own database at Supabase. Your browser sends only the post's address and a number:
+      a view, a reaction, or a few seconds of reading time, counted only while the tab is visible and you are active
+      on it. No IP address, cookie or identifier is stored with these counts.
+    </p>
+    <p>
+      To count each reader once per day and remember your reaction, your browser keeps two small notes in its own
+      local storage. They never leave your device. Views and reading time are not sent if your browser sends Do Not
+      Track or Global Privacy Control. The counts are approximate: clearing your browser storage or using another
+      device counts you again.
     </p>
 
     <h2>3D models</h2>
