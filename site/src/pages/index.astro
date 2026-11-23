@@ -1,8 +1,8 @@
 ---
 import Base from "../layouts/Base.astro";
-import FieldCanvas from "../components/FieldCanvas.astro";
 import Ticker from "../components/Ticker.astro";
 import PostList from "../components/PostList.astro";
+import FieldIcon from "../components/FieldIcon.astro";
 import { FIELDS, PILLARS, PRINCIPLES, PRODUCTS, SITE, TOOLS, CAMPUS_AMBASSADOR_FORM } from "../data/site";
 import { getPublishedPosts } from "../lib/posts";
 import { getOrgStats } from "../lib/github";
@@ -15,62 +15,124 @@ const featured = PRODUCTS.slice(0, 4);
 const sample = titan.samples[0];
 const gainPct = ((1 - titan.test.int8.bpc / titan.baselines.test_bpc_best_order) * 100).toFixed(0);
 const titanParams = (titan.params / 1e6).toFixed(1);
+const published = allPosts.filter((p) => !p.data.draft).length;
+
+// The word after "Research you can" cycles through these. The first one is what readers without
+// JavaScript, screen readers and search engines get.
+const words = ["rerun.", "check.", "measure.", "build on."];
+
+// Captions under the hero figure, in the order the figure shows the fields.
+const captions = [
+  "01 · Machine learning: layers of a network, an activation passing through",
+  "02 · Semiconductors: a die grid, a signal crossing it",
+  "03 · Quantum computing: states on a Bloch sphere, one orbit precessing",
+];
+
+// The statement that lights up word by word. Words marked with * are drawn in red.
+const statement =
+  "A result is not *finished until someone other than its author has *rerun it from the published code and got the *same *numbers.".split(" ");
+
+const numbers = [
+  { label: "Public repositories", value: stats.publicRepos, src: `GitHub · ${SITE.githubOrg} · ${stats.fetchedAt}` },
+  { label: "Posts published", value: published, src: "This site" },
+  { label: "Research fields", value: FIELDS.length, src: "ML · semiconductors · quantum" },
+  { label: "Products in progress", value: PRODUCTS.filter((p) => p.kind === "dev").length, src: "See products" },
+];
 ---
 
 <Base>
-  <!-- HERO: graphite stage -->
+  <!-- 1. HERO: dark stage; text left, a figure that becomes each field on the right -->
   <section class="hero t-graphite">
     <div class="wrap hero-grid">
-      <div class="hero-text">
-        <p class="label label--red">NeuroTitan Labs · independent research</p>
-        <h1 class="display">Research you can rerun.</h1>
-        <p class="lede">
+      <div class="hero-inner">
+        <p class="eyebrow label"><span class="dash" aria-hidden="true"></span>NeuroTitan Labs · independent research</p>
+        <h1 class="hero-title" aria-label={`Research you can ${words[0]}`}>
+          <span aria-hidden="true">Research you can</span>
+          <span class="swap" aria-hidden="true" data-words={JSON.stringify(words)}>{words[0]}</span>
+        </h1>
+        <p class="lede hero-lede">
           We work on machine learning, chip design and quantum computing. Every result ships with the code, data and
           random seeds that produced it, and we publish what did not work next to what did.
         </p>
         <div class="actions">
-          <a class="button" href="/ai">Explore NeuroTitan AI</a>
-          <a class="button button--ghost" href="/research">Research areas</a>
+          <a class="btn btn--light" href="/ai">Explore NeuroTitan AI <span aria-hidden="true">→</span></a>
+          <a class="btn btn--glass" href="/research">Research areas</a>
         </div>
       </div>
-      <div class="hero-visual">
-        <FieldCanvas />
-      </div>
+      <figure class="hero-figure" aria-hidden="true">
+        <canvas data-figure></canvas>
+        <figcaption class="label" data-figure-caption data-captions={JSON.stringify(captions)}>{captions[0]}</figcaption>
+      </figure>
+    </div>
+    <div class="wrap facts">
+      <div><strong>Code</strong><span>with every result</span></div>
+      <div><strong>Data</strong><span>and the random seeds</span></div>
+      <div><strong>Failures</strong><span>published next to successes</span></div>
     </div>
   </section>
 
   <Ticker items={TOOLS} label="Tools we use" />
 
-  <!-- FIELDS: paper with dot grid -->
-  <section class="section dots">
+  <!-- 2. STATEMENT: the lab's rule, lit word by word as you scroll -->
+  <section class="statement t-graphite" data-statement>
+    <div class="statement-stage">
+      <div class="wrap">
+        <p class="label statement-kicker">The standard</p>
+        <p class="statement-text">
+          {
+            statement.map((w) => (
+              <>
+                <span class:list={["w", { red: w.startsWith("*") }]}>{w.replace("*", "")}</span>{" "}
+              </>
+            ))
+          }
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3. FIELDS: numbered rows with moving line drawings -->
+  <section class="section fields-sec">
     <div class="wrap">
       <div class="section-head section-head--split" data-reveal>
         <div>
           <p class="label">01 · Fields</p>
-          <h2>Three fields, one standard of evidence</h2>
+          <h2>What we work on</h2>
         </div>
         <p class="lede">
           A result is not finished until someone other than its author has rerun it from the published code and got
           the same numbers.
         </p>
       </div>
-      <div class="bento">
+      <ol class="rows">
         {
           FIELDS.map((f) => (
-            <a class="field card" href={f.href} data-reveal>
-              <span class="label label--red">{f.index}</span>
-              <h3>{f.name}</h3>
-              <p>{f.summary}</p>
-              <span class="more label">Open →</span>
-            </a>
+            <li class="row" data-reveal>
+              <a href={f.href}>
+                <span class="row-num label">{f.index}</span>
+                <div class="row-text">
+                  <h3>{f.name}</h3>
+                  <p>{f.summary}</p>
+                  <ul class="chips" aria-label="Tools">
+                    {f.tools.slice(0, 4).map((t) => (
+                      <li>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+                <div class="row-art">
+                  <FieldIcon id={f.id} />
+                </div>
+              </a>
+            </li>
           ))
         }
-      </div>
+      </ol>
     </div>
   </section>
 
-  <!-- AI: graphite with a console -->
+  <!-- 4. AI: graphite with a console -->
   <section class="section t-graphite ai">
+    <div class="ai-glow" aria-hidden="true"></div>
     <div class="wrap ai-grid">
       <div data-reveal>
         <p class="label">02 · NeuroTitan AI</p>
@@ -81,8 +143,8 @@ const titanParams = (titan.params / 1e6).toFixed(1);
           own inference engine, and you can watch its real attention as it writes.
         </p>
         <div class="actions">
-          <a class="button" href="/ai#demo">Try Titan-nano</a>
-          <a class="button button--ghost" href="/ai#results">See the results</a>
+          <a class="btn btn--light" href="/ai#demo">Try Titan-nano <span aria-hidden="true">→</span></a>
+          <a class="btn btn--glass" href="/ai#results">See the results</a>
         </div>
       </div>
       <div class="console" data-reveal aria-label="A real completion from Titan-nano">
@@ -92,7 +154,7 @@ const titanParams = (titan.params / 1e6).toFixed(1);
     </div>
   </section>
 
-  <!-- PRODUCTS -->
+  <!-- 5. PRODUCTS -->
   <section class="section">
     <div class="wrap">
       <div class="section-head section-head--split" data-reveal>
@@ -105,7 +167,7 @@ const titanParams = (titan.params / 1e6).toFixed(1);
       <div class="products">
         {
           featured.map((p) => (
-            <article class="product card" data-reveal>
+            <article class="product" data-reveal>
               <header>
                 <h3>{p.name}</h3>
                 <span class={`pill pill--${p.kind}`}>{p.status}</span>
@@ -126,43 +188,34 @@ const titanParams = (titan.params / 1e6).toFixed(1);
     </div>
   </section>
 
-  <!-- NUMBERS: concrete band, only computed values -->
+  <!-- 6. NUMBERS: computed at build time, count up on screen -->
   <section class="section t-concrete">
-    <div class="wrap numbers">
-      <div data-reveal>
-        <p class="label">04 · The lab in numbers</p>
-        <h2>Counted, not claimed</h2>
-        <p class="muted note">
-          These numbers are computed when the site is built, from GitHub and from this site's own content. Nothing
-          here is typed in by hand.
+    <div class="wrap">
+      <div class="section-head section-head--split" data-reveal>
+        <div>
+          <p class="label">04 · The lab in numbers</p>
+          <h2>Counted, not claimed</h2>
+        </div>
+        <p class="lede">
+          Computed when the site is built, from GitHub and from this site's own content. Nothing here is typed in by
+          hand.
         </p>
       </div>
-      <dl class="tiles" data-reveal>
-        <div class="tile">
-          <dt class="label">Public repositories</dt>
-          <dd>{stats.publicRepos ?? "—"}</dd>
-          <dd class="src">GitHub · {SITE.githubOrg} · {stats.fetchedAt}</dd>
-        </div>
-        <div class="tile">
-          <dt class="label">Posts published</dt>
-          <dd>{allPosts.filter((p) => !p.data.draft).length}</dd>
-          <dd class="src">This site · first posts in review</dd>
-        </div>
-        <div class="tile">
-          <dt class="label">Research fields</dt>
-          <dd>{FIELDS.length}</dd>
-          <dd class="src">ML · semiconductors · quantum</dd>
-        </div>
-        <div class="tile">
-          <dt class="label">Products in progress</dt>
-          <dd>{PRODUCTS.filter((p) => p.kind === "dev").length}</dd>
-          <dd class="src">See products</dd>
-        </div>
+      <dl class="big-numbers" data-reveal>
+        {
+          numbers.map((n) => (
+            <div>
+              <dt>{n.label}</dt>
+              <dd class="big" data-count={n.value ?? undefined}>{n.value ?? "—"}</dd>
+              <dd class="src">{n.src}</dd>
+            </div>
+          ))
+        }
       </dl>
     </div>
   </section>
 
-  <!-- BLOG -->
+  <!-- 7. BLOG -->
   <section class="section">
     <div class="wrap">
       <div class="section-head section-head--split" data-reveal>
@@ -176,149 +229,412 @@ const titanParams = (titan.params / 1e6).toFixed(1);
         posts.length > 0 ? (
           <PostList posts={posts} />
         ) : (
-          <div class="empty card" data-reveal>
-            <p class="label label--red">Coming soon</p>
-            <p>
-              The first posts are being run and checked now. Each one will link to a public repository you can
-              rerun. <a href="/rss.xml">Follow by RSS</a> or visit the <a href="/blog">blog</a>.
-            </p>
-          </div>
+          <p class="muted">The first posts are being run and checked now.</p>
         )
       }
     </div>
   </section>
 
-  <!-- STANDARDS + PILLARS -->
+  <!-- 8. HOW WE WORK -->
   <section class="section dots">
     <div class="wrap two-col">
       <div class="section-head" data-reveal>
         <p class="label">06 · How we work</p>
         <h2>The rules every result follows</h2>
       </div>
-      <dl class="principles" data-reveal>
+      <ol class="principles" data-reveal>
         {
           [...PRINCIPLES, ...PILLARS].slice(0, 6).map((p, i) => (
-            <div>
-              <dt>
-                <span class="label label--red">{String(i + 1).padStart(2, "0")}</span>
-                {p.title}
-              </dt>
-              <dd>{p.body}</dd>
-            </div>
+            <li>
+              <span class="p-num">{String(i + 1).padStart(2, "0")}</span>
+              <div>
+                <h3>{p.title}</h3>
+                <p>{p.body}</p>
+              </div>
+            </li>
           ))
         }
-      </dl>
+      </ol>
     </div>
   </section>
 
-  <!-- COMMUNITY + TEAM: concrete band -->
-  <section class="section t-concrete">
-    <div class="wrap two-col">
-      <div class="section-head" data-reveal>
-        <p class="label">07 · Community</p>
-        <h2>Join the lab</h2>
-        <p class="muted">Contribute on GitHub, represent the lab on your campus, or write to us.</p>
+  <!-- 9. JOIN -->
+  <section class="section join-sec">
+    <div class="wrap join-grid">
+      <div class="join-head" data-reveal>
+        <p class="label label--red">07 · Join the lab</p>
+        <h2>Rerun our work.<br /><span class="soft">Or build the next one with us.</span></h2>
       </div>
-      <ul class="join" data-reveal>
+      <ul class="join-links" data-reveal>
         <li>
-          <span class="label label--red">GitHub</span>
-          <p>Every repository is public. Issues and pull requests are welcome.</p>
-          <a href={SITE.github} rel="noopener">github.com/{SITE.githubOrg} ↗</a>
+          <a href={SITE.github} rel="noopener">
+            <span class="label">GitHub</span>
+            <span class="jl-text">Every repository is public. Issues and pull requests welcome.</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
         </li>
         <li>
-          <span class="label label--red">Campus ambassadors</span>
-          <p>Students who want to represent the lab and run sessions at their college.</p>
-          <a href={CAMPUS_AMBASSADOR_FORM} rel="noopener">Apply ↗</a>
+          <a href={CAMPUS_AMBASSADOR_FORM} rel="noopener">
+            <span class="label">Campus ambassadors</span>
+            <span class="jl-text">Represent the lab and run sessions at your college.</span>
+            <span class="arrow" aria-hidden="true">↗</span>
+          </a>
         </li>
         <li>
-          <span class="label label--red">Corrections and collaboration</span>
-          <p>Found an error in something we published, or want to work with us.</p>
-          <a href={`mailto:${SITE.email}`}>{SITE.email}</a>
+          <a href={`mailto:${SITE.email}`}>
+            <span class="label">Corrections</span>
+            <span class="jl-text">Found an error? {SITE.email}</span>
+            <span class="arrow" aria-hidden="true">→</span>
+          </a>
         </li>
       </ul>
     </div>
   </section>
 </Base>
 
+<script>
+  import "../scripts/home";
+</script>
+
 <style>
+  /* ---------- shared ---------- */
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.85rem 1.35rem;
+    border-radius: 999px;
+    font-family: var(--sans);
+    font-size: 0.95rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
+  }
+
+  .btn:hover {
+    transform: translateY(-2px);
+  }
+
+  .btn--light {
+    background: var(--ink);
+    color: var(--paper);
+    box-shadow: 0 8px 24px -10px rgba(229, 87, 78, 0.55);
+  }
+
+  .btn--light:hover {
+    color: var(--paper);
+    background: #fff;
+  }
+
+  .btn--glass {
+    color: var(--ink);
+    border: 1px solid rgba(236, 232, 225, 0.22);
+    background: rgba(236, 232, 225, 0.06);
+    -webkit-backdrop-filter: blur(8px);
+    backdrop-filter: blur(8px);
+  }
+
+  .btn--glass:hover {
+    color: var(--ink);
+    border-color: var(--red);
+  }
+
+  /* ---------- 1. hero ---------- */
   .hero {
     position: relative;
     overflow: hidden;
-    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-    background-size: 22px 22px;
+    min-height: 100svh;
+    display: grid;
+    grid-template-rows: 1fr auto;
+    background:
+      radial-gradient(60rem 40rem at 78% 45%, rgba(229, 87, 78, 0.07), transparent 60%),
+      var(--paper);
   }
 
   .hero-grid {
     display: grid;
-    grid-template-columns: 1.15fr 1fr;
-    gap: clamp(2rem, 5vw, 4rem);
+    grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+    gap: clamp(1.5rem, 4vw, 4rem);
     align-items: center;
-    min-height: min(84vh, 52rem);
-    padding-block: clamp(3rem, 8vw, 6rem);
+    width: 100%;
+    padding-block: clamp(2.5rem, 7vh, 5rem) 2rem;
   }
 
-  .hero-text {
+  .hero-inner {
     display: grid;
     gap: 1.6rem;
   }
 
-  .actions {
+  .eyebrow {
     display: flex;
-    flex-wrap: wrap;
-    gap: 0.85rem;
-    margin-top: 0.5rem;
+    align-items: center;
+    gap: 0.75rem;
   }
 
-  .bento {
+  .dash {
+    width: 2.5rem;
+    height: 1px;
+    background: var(--red);
+  }
+
+  .hero-title {
+    display: grid;
+    font-size: clamp(3rem, 7.4vw, 6.75rem);
+    font-weight: 400;
+    letter-spacing: -0.035em;
+    line-height: 0.98;
+  }
+
+  .swap {
+    color: var(--red);
+    font-style: italic;
+    min-height: 1em;
+    white-space: nowrap;
+  }
+
+  .hero-lede {
+    max-width: 34rem;
+  }
+
+  .hero-figure {
+    margin: 0;
+    display: grid;
+    gap: 0.75rem;
+    justify-items: center;
+  }
+
+  .hero-figure canvas {
+    width: 100%;
+    aspect-ratio: 1;
+    max-width: 38rem;
+  }
+
+  .hero-figure figcaption {
+    min-height: 2.6em;
+    max-width: 30rem;
+    text-align: center;
+    line-height: 1.5;
+    text-transform: none;
+    letter-spacing: 0.02em;
+  }
+
+  .hero-figure figcaption.is-in {
+    animation: cap-in 600ms ease both;
+  }
+
+  @keyframes cap-in {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+  }
+
+  .facts {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
+    width: 100%;
+    padding-block: 1.5rem 2.25rem;
+    border-top: 1px solid var(--rule);
   }
 
-  .field {
+  .facts div {
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+
+  .facts strong {
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(1.6rem, 3vw, 2.4rem);
+    line-height: 1;
+  }
+
+  .facts span {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--grey);
+  }
+
+  /* ---------- 2. statement ----------
+     Without JS (or with reduced motion) the text is simply shown in full. With JS the section is
+     taller and its stage sticks while the words light up. */
+  .statement {
+    border-top: 1px solid var(--rule);
+  }
+
+  .statement-stage {
     display: grid;
-    align-content: start;
-    gap: 0.9rem;
-    padding: 1.75rem;
+    align-items: center;
+    padding-block: clamp(5rem, 14vh, 9rem);
+  }
+
+  .statement.is-live {
+    height: 240vh;
+  }
+
+  .statement.is-live .statement-stage {
+    position: sticky;
+    top: 0;
+    min-height: 100svh;
+    padding-block: var(--header-h) 2rem;
+  }
+
+  .statement-kicker {
+    margin-bottom: 1.75rem;
+  }
+
+  .statement-text {
+    font-family: var(--serif);
+    font-size: clamp(2rem, 5.2vw, 4.6rem);
+    line-height: 1.12;
+    letter-spacing: -0.025em;
+    max-width: 22ch;
+    text-wrap: balance;
+  }
+
+  .w {
+    transition: color 350ms ease;
+  }
+
+  .statement.is-live .w {
+    color: rgba(236, 232, 225, 0.16);
+  }
+
+  .statement.is-live .w.on {
+    color: var(--ink);
+  }
+
+  .w.red,
+  .statement.is-live .w.red.on {
+    color: var(--red);
+    font-style: italic;
+  }
+
+  /* ---------- 3. field rows ---------- */
+  .rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: grid;
+    gap: 1rem;
+  }
+
+  .row a {
+    display: grid;
+    grid-template-columns: 4rem 1fr 11rem;
+    gap: 1.5rem 2rem;
+    align-items: center;
+    padding: clamp(1.4rem, 3vw, 2.25rem);
+    border-radius: 1.5rem;
+    border: 1px solid var(--rule);
+    background: rgba(255, 255, 255, 0.45);
     text-decoration: none;
-    min-height: 20rem;
-    transition: transform 160ms ease, box-shadow 160ms ease;
+    color: var(--ink);
+    transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease, background-color 220ms ease;
   }
 
-  .field:hover {
-    color: inherit;
-    transform: translate(-2px, -2px);
-    box-shadow: 8px 8px 0 var(--red);
+  .row a:hover {
+    color: var(--ink);
+    transform: translateY(-3px);
+    border-color: var(--ink);
+    background: #fff;
+    box-shadow: 0 18px 40px -24px rgba(21, 21, 21, 0.35);
   }
 
-  .field h3 {
-    font-size: 1.85rem;
+  .row-num {
+    align-self: start;
+    padding-top: 0.6rem;
   }
 
-  .field p {
+  .row-text {
+    display: grid;
+    gap: 0.75rem;
+  }
+
+  .row h3 {
+    font-size: clamp(1.7rem, 3vw, 2.4rem);
+  }
+
+  .row p {
+    color: var(--ink-2);
+    max-width: 44rem;
+  }
+
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+    list-style: none;
+    margin: 0.25rem 0 0;
+    padding: 0;
+  }
+
+  .chips li {
+    font-family: var(--mono);
+    font-size: 0.72rem;
+    padding: 0.25rem 0.65rem;
+    border-radius: 999px;
+    border: 1px solid var(--rule);
     color: var(--ink-2);
   }
 
-  .field .more {
-    margin-top: auto;
-    align-self: end;
+  .row-art {
+    color: var(--ink);
+  }
+
+  /* ---------- 4. AI ---------- */
+  .ai {
+    position: relative;
+    overflow: hidden;
+  }
+
+  .ai-glow {
+    position: absolute;
+    width: 40rem;
+    height: 40rem;
+    right: -12rem;
+    top: -14rem;
+    border-radius: 50%;
+    background: radial-gradient(circle, rgba(229, 87, 78, 0.18), transparent 65%);
+    pointer-events: none;
   }
 
   .ai-grid {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: clamp(2rem, 5vw, 4rem);
     align-items: center;
   }
 
-  .ai h2,
-  .numbers h2 {
+  .ai h2 {
     font-size: clamp(2rem, 4vw, 3.25rem);
     margin-block: 0.85rem 1.25rem;
   }
 
+  .ai .lede {
+    margin-bottom: 1.75rem;
+  }
+
   .ai .console {
-    box-shadow: 8px 8px 0 #000;
+    border-radius: 1rem;
+    overflow: hidden;
+    box-shadow: 0 30px 60px -30px rgba(0, 0, 0, 0.9), 0 0 0 1px rgba(236, 232, 225, 0.06);
+  }
+
+  .console-bar i {
+    border-radius: 50%;
   }
 
   .sample {
@@ -336,17 +652,28 @@ const titanParams = (titan.params / 1e6).toFixed(1);
     color: var(--red);
   }
 
+  /* ---------- 5. products ---------- */
   .products {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
-    gap: 1.5rem;
+    gap: 1rem;
   }
 
   .product {
     display: grid;
     align-content: start;
     gap: 0.9rem;
-    padding: 1.6rem;
+    padding: 1.75rem;
+    border-radius: 1.5rem;
+    border: 1px solid var(--rule);
+    background: rgba(255, 255, 255, 0.45);
+    transition: transform 220ms ease, border-color 220ms ease, background-color 220ms ease;
+  }
+
+  .product:hover {
+    transform: translateY(-3px);
+    border-color: var(--ink);
+    background: #fff;
   }
 
   .product header {
@@ -362,6 +689,14 @@ const titanParams = (titan.params / 1e6).toFixed(1);
 
   .product p {
     color: var(--ink-2);
+  }
+
+  .product .pill {
+    border-radius: 999px;
+  }
+
+  .product .pill::before {
+    border-radius: 50%;
   }
 
   .links {
@@ -384,64 +719,51 @@ const titanParams = (titan.params / 1e6).toFixed(1);
     font-size: 0.875rem;
   }
 
-  .numbers {
+  /* ---------- 6. numbers ---------- */
+  .big-numbers {
     display: grid;
-    grid-template-columns: 1fr 1.4fr;
-    gap: clamp(2rem, 5vw, 4rem);
-    align-items: start;
-  }
-
-  .note {
-    max-width: 30rem;
-  }
-
-  .tiles {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 0;
+    grid-template-columns: repeat(4, 1fr);
     margin: 0;
     border-top: 1px solid var(--ink);
-    border-left: 1px solid var(--ink);
   }
 
-  .tile {
-    padding: 1.4rem 1.5rem;
-    border-right: 1px solid var(--ink);
-    border-bottom: 1px solid var(--ink);
-    background: var(--paper);
+  .big-numbers > div {
+    display: grid;
+    gap: 0.35rem;
+    padding: 1.75rem 1.5rem 1.5rem 0;
   }
 
-  .tile dd:not(.src) {
-    margin: 0.5rem 0 0.4rem;
-    font-family: var(--mono);
-    font-size: clamp(2.5rem, 5vw, 3.75rem);
-    font-weight: 500;
+  .big-numbers > div + div {
+    padding-left: 1.5rem;
+    border-left: 1px solid var(--rule);
+  }
+
+  .big {
+    order: -1;
+    margin: 0;
+    font-family: var(--serif);
+    font-size: clamp(3.5rem, 8vw, 6rem);
+    font-weight: 400;
     line-height: 1;
-    letter-spacing: -0.03em;
+    letter-spacing: -0.04em;
   }
 
-  .tile:first-child dd {
+  .big-numbers > div:first-child .big {
     color: var(--red);
+  }
+
+  .big-numbers dt {
+    font-weight: 500;
   }
 
   .src {
     margin: 0;
     font-family: var(--mono);
-    font-size: 0.75rem;
+    font-size: 0.72rem;
     color: var(--grey);
   }
 
-  .empty {
-    display: grid;
-    gap: 0.75rem;
-    padding: 1.75rem;
-    max-width: 44rem;
-  }
-
-  .empty a {
-    color: var(--red);
-  }
-
+  /* ---------- 8. principles ---------- */
   .two-col {
     display: grid;
     grid-template-columns: 1fr 1.6fr;
@@ -449,95 +771,190 @@ const titanParams = (titan.params / 1e6).toFixed(1);
   }
 
   .principles {
+    list-style: none;
+    margin: 0;
+    padding: 0;
     display: grid;
     grid-template-columns: 1fr 1fr;
-    gap: 2rem 2.5rem;
-    margin: 0;
+    gap: 1rem;
   }
 
-  .principles dt {
+  .principles li {
     display: grid;
-    gap: 0.4rem;
+    grid-template-columns: auto 1fr;
+    gap: 1rem;
+    padding: 1.4rem;
+    border-radius: 1.25rem;
+    background: var(--paper);
+    border: 1px solid var(--rule);
+  }
+
+  .p-num {
+    display: grid;
+    place-items: center;
+    width: 2.2rem;
+    height: 2.2rem;
+    border-radius: 50%;
+    background: var(--ink);
+    color: var(--paper);
+    font-family: var(--mono);
+    font-size: 0.75rem;
+  }
+
+  .principles h3 {
+    font-family: var(--sans);
+    font-size: 1rem;
     font-weight: 600;
-    margin-bottom: 0.45rem;
+    letter-spacing: 0;
+    margin-bottom: 0.35rem;
   }
 
-  .principles dd {
-    margin: 0;
+  .principles p {
     color: var(--ink-2);
+    font-size: 0.95rem;
   }
 
-  .join {
+  /* ---------- 9. join ---------- */
+  .join-grid {
+    display: grid;
+    grid-template-columns: 1fr 1.25fr;
+    gap: clamp(2rem, 5vw, 5rem);
+    align-items: start;
+  }
+
+  .join-head {
+    display: grid;
+    gap: 1.25rem;
+  }
+
+  .join-head h2 {
+    font-size: clamp(2.1rem, 4.4vw, 3.5rem);
+  }
+
+  .soft {
+    color: var(--grey);
+  }
+
+  .join-links {
     list-style: none;
     margin: 0;
     padding: 0;
     border-top: 1px solid var(--ink);
   }
 
-  .join li {
+  .join-links a {
     display: grid;
-    grid-template-columns: 14rem 1fr auto;
-    align-items: baseline;
-    gap: 1rem;
-    padding-block: 1.2rem;
+    grid-template-columns: 1fr auto;
+    grid-template-areas:
+      "label arrow"
+      "text arrow";
+    gap: 0.35rem 1.5rem;
+    align-items: center;
+    padding: 1.5rem 0.25rem;
     border-bottom: 1px solid var(--rule);
-  }
-
-  .join p {
-    color: var(--ink-2);
-  }
-
-  .join a {
-    font-family: var(--mono);
-    font-size: 0.8125rem;
-    color: var(--red);
     text-decoration: none;
+    color: var(--ink);
+    transition: padding 220ms ease;
+  }
+
+  .join-links .label {
+    grid-area: label;
+  }
+
+  .jl-text {
+    grid-area: text;
+    font-size: clamp(1.1rem, 1.8vw, 1.35rem);
     overflow-wrap: anywhere;
   }
 
+  .arrow {
+    grid-area: arrow;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    border: 1px solid var(--rule);
+    font-size: 1.1rem;
+    transition: background-color 220ms ease, color 220ms ease, border-color 220ms ease, transform 220ms ease;
+  }
+
+  .join-links a:hover {
+    color: var(--ink);
+    padding-left: 0.9rem;
+  }
+
+  .join-links a:hover .arrow {
+    background: var(--red);
+    border-color: var(--red);
+    color: var(--on-red);
+    transform: rotate(-8deg);
+  }
+
+  /* ---------- responsive ---------- */
   @media (max-width: 64rem) {
-    .bento {
+    .hero-grid {
       grid-template-columns: 1fr;
     }
 
-    .field {
-      min-height: 0;
+    .hero-figure canvas {
+      max-width: 24rem;
+    }
+
+    .big-numbers {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .big-numbers > div:nth-child(3) {
+      padding-left: 0;
+      border-left: 0;
+    }
+
+    .big-numbers > div:nth-child(n + 3) {
+      border-top: 1px solid var(--rule);
     }
   }
 
   @media (max-width: 56rem) {
-    .hero-grid,
     .ai-grid,
-    .numbers,
     .two-col,
-    .products {
-      grid-template-columns: 1fr;
-    }
-
-    .hero-grid {
-      min-height: 0;
-    }
-
-    .hero-visual {
-      max-width: 26rem;
-      width: 100%;
-      justify-self: center;
-    }
-
+    .products,
+    .join-grid,
     .principles {
       grid-template-columns: 1fr;
     }
 
-    .join li {
+    .row a {
       grid-template-columns: 1fr;
-      gap: 0.35rem;
     }
+
+    .row-num {
+      padding-top: 0;
+    }
+
+    .row-art {
+      display: none;
+    }
+
+    .facts {
+      grid-template-columns: 1fr;
+      gap: 0.6rem;
+    }
+
+
+
   }
 
   @media (max-width: 30rem) {
-    .tiles {
+    .big-numbers {
       grid-template-columns: 1fr;
     }
 
+    .big-numbers > div,
+    .big-numbers > div + div {
+      padding-left: 0;
+      border-left: 0;
+      border-top: 1px solid var(--rule);
+    }
   }
 </style>

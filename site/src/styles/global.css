@@ -86,6 +86,7 @@
   --wrap: 76rem;
   --gutter: clamp(1.25rem, 4vw, 2.5rem);
   --measure: 40rem;
+  --header-h: 4.5rem;
 }
 
 *,
@@ -162,6 +163,17 @@ p {
   max-width: var(--wrap);
   margin-inline: auto;
   padding-inline: var(--gutter);
+}
+
+/* ---------- Header space ----------
+ * The floating menu (Header.astro) sits in a transparent sticky strip. The first section of every page
+ * slides up underneath it; a transparent top border of the same height keeps its content clear, and
+ * the section's own background (colour and dot grid) shows through that border.
+ */
+main > :first-child {
+  margin-top: calc(-1 * var(--header-h));
+  border-top: var(--header-h) solid transparent;
+  background-clip: border-box;
 }
 
 /* ---------- Type helpers ---------- */

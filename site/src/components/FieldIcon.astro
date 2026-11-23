@@ -1,0 +1,175 @@
+---
+/** Small animated line drawings, one per field. Pure SVG + CSS; still under reduced motion. */
+interface Props {
+  id: "ai" | "semiconductors" | "quantum";
+}
+const { id } = Astro.props;
+const layers = [
+  [20, 50, 80],
+  [14, 38, 62, 86],
+  [32, 68],
+];
+const xs = [18, 60, 102];
+---
+
+<svg class={`icon icon--${id}`} viewBox="0 0 120 100" aria-hidden="true" focusable="false">
+  {
+    id === "ai" && (
+      <g>
+        {layers.slice(0, -1).map((col, li) =>
+          col.map((y1) =>
+            layers[li + 1].map((y2) => <line class="edge" x1={xs[li]} y1={y1} x2={xs[li + 1]} y2={y2} />),
+          ),
+        )}
+        {layers.map((col, li) =>
+          col.map((y, ni) => (
+            <circle class="node" cx={xs[li]} cy={y} r="5" style={`animation-delay:${li * 0.35 + ni * 0.08}s`} />
+          )),
+        )}
+      </g>
+    )
+  }
+  {
+    id === "semiconductors" && (
+      <g>
+        <rect class="chip" x="38" y="28" width="44" height="44" rx="4" />
+        <rect class="die" x="50" y="40" width="20" height="20" rx="2" />
+        {[36, 50, 64].map((p) => (
+          <>
+            <line class="pin" x1="26" y1={p} x2="38" y2={p} />
+            <line class="pin" x1="82" y1={p} x2="94" y2={p} />
+          </>
+        ))}
+        <path class="trace" d="M4 36 H26" />
+        <path class="trace t2" d="M94 64 H116" />
+        <path class="trace t3" d="M60 4 V28" />
+        <path class="trace t4" d="M60 72 V96" />
+      </g>
+    )
+  }
+  {
+    id === "quantum" && (
+      <g transform="translate(60 50)">
+        <circle class="sphere" r="38" />
+        <ellipse class="equator" rx="38" ry="11" />
+        <line class="axis" x1="0" y1="-44" x2="0" y2="44" />
+        <g class="state">
+          <line class="vec" x1="0" y1="0" x2="22" y2="-26" />
+          <circle class="tip" cx="22" cy="-26" r="4.5" />
+        </g>
+      </g>
+    )
+  }
+</svg>
+
+<style>
+  .icon {
+    width: 100%;
+    height: auto;
+    overflow: visible;
+  }
+
+  .edge,
+  .pin,
+  .chip,
+  .die,
+  .sphere,
+  .equator,
+  .axis,
+  .vec {
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.4;
+  }
+
+  .edge {
+    opacity: 0.22;
+  }
+
+  .node {
+    fill: var(--paper);
+    stroke: currentColor;
+    stroke-width: 1.6;
+    animation: fire 2.4s ease-in-out infinite;
+  }
+
+  @keyframes fire {
+    0%,
+    100% {
+      fill: var(--paper);
+    }
+    18% {
+      fill: var(--red);
+      stroke: var(--red);
+    }
+    40% {
+      fill: var(--paper);
+    }
+  }
+
+  .die {
+    fill: var(--red-soft);
+  }
+
+  .trace {
+    fill: none;
+    stroke: var(--red);
+    stroke-width: 2;
+    stroke-dasharray: 6 40;
+    animation: run 1.8s linear infinite;
+  }
+
+  .t2 {
+    animation-delay: -0.5s;
+  }
+  .t3 {
+    animation-delay: -1s;
+  }
+  .t4 {
+    animation-delay: -1.4s;
+  }
+
+  @keyframes run {
+    to {
+      stroke-dashoffset: -46;
+    }
+  }
+
+  .equator,
+  .axis {
+    opacity: 0.35;
+    stroke-dasharray: 3 3;
+  }
+
+  .vec {
+    stroke: var(--red);
+    stroke-width: 2;
+  }
+
+  .tip {
+    fill: var(--red);
+  }
+
+  .state {
+    animation: precess 6s linear infinite;
+    transform-origin: 0 0;
+  }
+
+  @keyframes precess {
+    0% {
+      transform: scaleX(1);
+    }
+    25% {
+      transform: scaleX(0);
+    }
+    50% {
+      transform: scaleX(-1);
+    }
+    75% {
+      transform: scaleX(0);
+    }
+    100% {
+      transform: scaleX(1);
+    }
+  }
+</style>

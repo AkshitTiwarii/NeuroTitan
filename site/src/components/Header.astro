@@ -6,31 +6,19 @@ const path = Astro.url.pathname.replace(/\/$/, "");
 const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`);
 ---
 
+<!--
+  Floating glass menu. The header strip is transparent and takes no clicks; only the pill does.
+  The first section of every page slides up underneath it (see global.css, "Header space").
+-->
 <header class="site-header t-graphite">
-  <div class="wrap bar">
-    <a class="brand" href="/" aria-label="NeuroTitan Labs, home">
-      <Mark size={24} />
-      <span class="brand-name">NeuroTitan<span class="brand-labs">Labs</span></span>
-    </a>
+  <div class="menu-wrap">
+    <div class="menu-pill" data-header-pill>
+      <a class="brand" href="/" aria-label="NeuroTitan Labs, home">
+        <Mark size={24} />
+        <span class="brand-name">NeuroTitan<span class="brand-labs">Labs</span></span>
+      </a>
 
-    <nav class="nav-desktop" aria-label="Main">
-      <ul>
-        {
-          NAV.map((item) => (
-            <li>
-              <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
-                {item.label}
-              </a>
-            </li>
-          ))
-        }
-      </ul>
-      <a class="gh" href={SITE.github} rel="noopener">GitHub ↗</a>
-    </nav>
-
-    <details class="nav-mobile">
-      <summary aria-label="Menu"><span></span><span></span></summary>
-      <nav aria-label="Main">
+      <nav class="nav-desktop" aria-label="Main">
         <ul>
           {
             NAV.map((item) => (
@@ -41,29 +29,79 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
               </li>
             ))
           }
-          <li><a href={SITE.github} rel="noopener">GitHub ↗</a></li>
         </ul>
       </nav>
-    </details>
+      <a class="gh" href={SITE.github} rel="noopener">GitHub <span aria-hidden="true">↗</span></a>
+
+      <details class="nav-mobile">
+        <summary aria-label="Menu"><span></span><span></span></summary>
+        <nav aria-label="Main">
+          <ul>
+            {
+              NAV.map((item) => (
+                <li>
+                  <a href={item.href} aria-current={isCurrent(item.href) ? "page" : undefined}>
+                    {item.label}
+                  </a>
+                </li>
+              ))
+            }
+            <li><a href={SITE.github} rel="noopener">GitHub ↗</a></li>
+          </ul>
+        </nav>
+      </details>
+    </div>
   </div>
 </header>
+
+<script>
+  // The pill tightens and darkens a little once the page has scrolled.
+  const pill = document.querySelector<HTMLElement>("[data-header-pill]");
+  if (pill) {
+    const set = () => pill.classList.toggle("is-scrolled", scrollY > 24);
+    set();
+    addEventListener("scroll", set, { passive: true });
+  }
+</script>
 
 <style>
   .site-header {
     position: sticky;
     top: 0;
-    z-index: 40;
-    border-bottom: 1px solid var(--rule);
-    background: rgba(15, 15, 15, 0.92);
-    backdrop-filter: blur(8px);
+    z-index: 50;
+    height: var(--header-h);
+    background: transparent;
+    pointer-events: none;
   }
 
-  .bar {
+  .menu-wrap {
+    max-width: calc(var(--wrap) + 1rem);
+    margin-inline: auto;
+    padding: 0.75rem clamp(0.6rem, 2vw, 1rem) 0;
+  }
+
+  .menu-pill {
+    pointer-events: auto;
+    position: relative;
     display: flex;
     align-items: center;
-    justify-content: space-between;
     gap: 1rem;
-    min-height: 4rem;
+    min-height: 3.5rem;
+    padding: 0.4rem 0.5rem 0.4rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(236, 232, 225, 0.1);
+    background: rgba(18, 18, 18, 0.62);
+    -webkit-backdrop-filter: blur(16px) saturate(140%);
+    backdrop-filter: blur(16px) saturate(140%);
+    box-shadow:
+      0 1px 0 rgba(255, 255, 255, 0.05) inset,
+      0 10px 30px -12px rgba(0, 0, 0, 0.55);
+    transition: background-color 250ms ease, min-height 250ms ease;
+  }
+
+  .menu-pill.is-scrolled {
+    background: rgba(14, 14, 14, 0.84);
+    min-height: 3.2rem;
   }
 
   .brand {
@@ -72,11 +110,12 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
     gap: 0.65rem;
     text-decoration: none;
     color: var(--ink);
+    margin-right: auto;
   }
 
   .brand-name {
     font-family: var(--mono);
-    font-size: 0.875rem;
+    font-size: 0.8125rem;
     font-weight: 500;
     letter-spacing: 0.12em;
     text-transform: uppercase;
@@ -87,48 +126,52 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
     margin-left: 0.5em;
   }
 
-  .nav-desktop {
+  .nav-desktop ul {
     display: flex;
-    align-items: center;
-    gap: 2rem;
-  }
-
-  ul {
-    display: flex;
-    gap: 1.6rem;
+    gap: 0.15rem;
     list-style: none;
     margin: 0;
     padding: 0;
   }
 
-  nav a {
-    font-size: 0.9rem;
+  .nav-desktop a {
+    display: block;
+    font-size: 0.875rem;
     text-decoration: none;
     color: var(--ink-2);
-    padding-block: 0.5rem;
+    padding: 0.45rem 0.8rem;
+    border-radius: 999px;
+    transition: color 150ms ease, background-color 150ms ease;
   }
 
-  nav a:hover,
-  nav a[aria-current="page"] {
+  .nav-desktop a:hover {
     color: var(--ink);
-    text-decoration: underline;
-    text-decoration-color: var(--red);
-    text-decoration-thickness: 2px;
-    text-underline-offset: 0.5em;
+    background: rgba(236, 232, 225, 0.07);
+  }
+
+  .nav-desktop a[aria-current="page"] {
+    color: var(--ink);
+    background: rgba(229, 87, 78, 0.18);
   }
 
   .gh {
+    flex: none;
     font-family: var(--mono);
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    border: 1px solid var(--rule);
-    padding: 0.45rem 0.7rem;
+    text-decoration: none;
+    color: var(--paper);
+    background: var(--ink);
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    transition: background-color 150ms ease, transform 150ms ease;
   }
 
   .gh:hover {
-    border-color: var(--red);
-    text-decoration: none;
+    color: var(--paper);
+    background: #fff;
+    transform: translateY(-1px);
   }
 
   .nav-mobile {
@@ -136,7 +179,8 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
   }
 
   @media (max-width: 64rem) {
-    .nav-desktop {
+    .nav-desktop,
+    .gh {
       display: none;
     }
 
@@ -148,8 +192,12 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
       list-style: none;
       cursor: pointer;
       display: grid;
+      place-content: center;
       gap: 6px;
-      padding: 0.75rem 0.25rem;
+      width: 2.6rem;
+      height: 2.6rem;
+      border-radius: 999px;
+      background: rgba(236, 232, 225, 0.08);
     }
 
     summary::-webkit-details-marker {
@@ -158,35 +206,55 @@ const isCurrent = (href: string) => path === href || path.startsWith(`${href}/`)
 
     summary span {
       display: block;
-      width: 22px;
+      width: 18px;
       height: 2px;
       background: var(--ink);
+      transition: transform 200ms ease;
     }
 
     .nav-mobile[open] summary span:first-child {
+      transform: translateY(4px) rotate(45deg);
       background: var(--red);
+    }
+
+    .nav-mobile[open] summary span:last-child {
+      transform: translateY(-4px) rotate(-45deg);
     }
 
     .nav-mobile nav {
       position: absolute;
       left: 0;
       right: 0;
-      top: 100%;
-      background: var(--paper);
-      border-bottom: 1px solid var(--rule);
-      padding: 0.5rem var(--gutter) 1.25rem;
+      top: calc(100% + 0.5rem);
+      border-radius: 1.25rem;
+      border: 1px solid rgba(236, 232, 225, 0.1);
+      /* Opaque on purpose: a blurred panel inside the blurred pill renders see-through in Chromium. */
+      background: #131313;
+      padding: 0.5rem 1.25rem 1rem;
+      box-shadow: 0 20px 40px -16px rgba(0, 0, 0, 0.6);
     }
 
     .nav-mobile ul {
-      flex-direction: column;
-      gap: 0;
+      list-style: none;
+      margin: 0;
+      padding: 0;
     }
 
     .nav-mobile li a {
       display: block;
       padding: 0.8rem 0;
       font-size: 1.05rem;
+      text-decoration: none;
+      color: var(--ink-2);
       border-bottom: 1px solid var(--rule);
+    }
+
+    .nav-mobile li:last-child a {
+      border-bottom: 0;
+    }
+
+    .nav-mobile li a[aria-current="page"] {
+      color: var(--red);
     }
   }
 
