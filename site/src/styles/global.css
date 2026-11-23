@@ -241,54 +241,96 @@ main > :first-child {
   background-size: 22px 22px;
 }
 
+/* Inner-page opening: dark stage, a soft red glow, the dot grid, and (optionally) the lab figure. */
+.page-hero {
+  position: relative;
+  overflow: hidden;
+  background-image:
+    radial-gradient(46rem 30rem at 82% 38%, rgba(229, 87, 78, 0.09), transparent 62%),
+    radial-gradient(var(--dot) 1px, transparent 1.2px);
+  background-size: auto, 22px 22px;
+}
+
 .page-head {
   display: grid;
-  gap: 1.25rem;
-  padding-block: clamp(4rem, 10vw, 7rem) clamp(3rem, 6vw, 4.5rem);
+  gap: 1.4rem;
+  padding-block: clamp(4rem, 11vw, 8rem) clamp(3rem, 7vw, 5rem);
+}
+
+.page-head > .label--red:first-child {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.page-head > .label--red:first-child::before {
+  content: "";
+  width: 2.5rem;
+  height: 1px;
+  background: var(--red);
 }
 
 .page-head h1 {
-  font-size: clamp(2.6rem, 6.5vw, 5rem);
-  letter-spacing: -0.025em;
-  max-width: 18ch;
+  font-size: clamp(2.8rem, 7vw, 5.75rem);
+  font-weight: 400;
+  letter-spacing: -0.035em;
+  line-height: 0.98;
+  max-width: 16ch;
+}
+
+@media (min-width: 72.01rem) {
+  .page-hero.has-art .page-head {
+    padding-right: min(34vw, 30rem);
+  }
 }
 
 /* ---------- Components ---------- */
 
+/* Rounded pill buttons (redesign, 2026-11-23). */
 .button {
   display: inline-flex;
   align-items: center;
-  gap: 0.55rem;
-  padding: 0.8rem 1.2rem;
-  font-family: var(--mono);
-  font-size: 0.8125rem;
+  gap: 0.6rem;
+  padding: 0.85rem 1.35rem;
+  border-radius: 999px;
+  font-family: var(--sans);
+  font-size: 0.95rem;
   font-weight: 500;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   text-decoration: none;
   border: 1px solid var(--ink);
   background: var(--ink);
   color: var(--paper);
-  box-shadow: 3px 3px 0 var(--red);
-  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease;
+  box-shadow: 0 8px 24px -12px rgba(163, 33, 27, 0.55);
+  transition: transform 180ms ease, background-color 180ms ease, border-color 180ms ease, color 180ms ease;
 }
 
 .button:hover {
   color: var(--paper);
-  transform: translate(-1px, -1px);
-  box-shadow: 5px 5px 0 var(--red);
+  transform: translateY(-2px);
+}
+
+.t-graphite .button:hover {
+  background: #fff;
+  border-color: #fff;
 }
 
 .button--ghost {
   background: transparent;
   color: var(--ink);
+  border-color: var(--rule);
   box-shadow: none;
 }
 
-.button--ghost:hover {
-  color: var(--red);
+.t-graphite .button--ghost {
+  background: rgba(236, 232, 225, 0.06);
+  border-color: rgba(236, 232, 225, 0.22);
+}
+
+.button--ghost:hover,
+.t-graphite .button--ghost:hover {
+  color: var(--ink);
+  background: transparent;
   border-color: var(--red);
-  box-shadow: none;
 }
 
 .pill {
@@ -300,8 +342,9 @@ main > :first-child {
   font-weight: 500;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.7rem;
   border: 1px solid var(--rule);
+  border-radius: 999px;
   color: var(--ink-2);
   white-space: nowrap;
 }
@@ -310,6 +353,7 @@ main > :first-child {
   content: "";
   width: 0.45rem;
   height: 0.45rem;
+  border-radius: 50%;
   background: var(--grey);
 }
 
@@ -321,11 +365,20 @@ main > :first-child {
   background: var(--red);
 }
 
-/* A framed "instrument" card: hairline border, hard offset shadow. */
+/* A soft rounded card: hairline border, gentle shadow, lifts on hover when it is a link. */
 .card {
-  border: 1px solid var(--ink);
+  border: 1px solid var(--rule);
+  border-radius: 1.25rem;
   background: var(--paper);
-  box-shadow: 6px 6px 0 var(--shadow);
+  box-shadow: 0 18px 40px -30px rgba(0, 0, 0, 0.45);
+  transition: transform 220ms ease, border-color 220ms ease, box-shadow 220ms ease;
+}
+
+a.card:hover {
+  color: inherit;
+  transform: translateY(-3px);
+  border-color: var(--ink);
+  box-shadow: 0 24px 48px -28px rgba(0, 0, 0, 0.5);
 }
 
 .console {
@@ -333,6 +386,8 @@ main > :first-child {
   font-size: 0.8125rem;
   line-height: 1.7;
   border: 1px solid var(--rule);
+  border-radius: 1rem;
+  overflow: hidden;
   background: var(--paper-2);
 }
 
@@ -349,6 +404,7 @@ main > :first-child {
 .console-bar i {
   width: 0.55rem;
   height: 0.55rem;
+  border-radius: 50%;
   background: var(--rule);
 }
 

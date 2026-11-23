@@ -1,5 +1,6 @@
 ---
 import Base from "../../layouts/Base.astro";
+import PageFigure from "../../components/PageFigure.astro";
 import PostList from "../../components/PostList.astro";
 import { getPublishedPosts } from "../../lib/posts";
 
@@ -10,7 +11,7 @@ const posts = await getPublishedPosts();
   title="Blog"
   description="Experiments, reproductions and designs from NeuroTitan Labs, each published with the code and data that produced it."
 >
-  <section class="t-graphite page-hero">
+  <section class="t-graphite page-hero has-art">
     <div class="wrap page-head">
     <p class="label label--red">Blog</p>
     <h1 class="display">Experiments, reproductions, designs.</h1>
@@ -19,6 +20,7 @@ const posts = await getPublishedPosts();
       A post that is not ready waits. <a href="/rss.xml">RSS feed</a>.
     </p>
     </div>
+    <PageFigure shapes="0,1,2" />
   </section>
 
   <section class="wrap list section">
@@ -36,10 +38,6 @@ const posts = await getPublishedPosts();
 </Base>
 
 <style>
-  .page-hero {
-    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-    background-size: 22px 22px;
-  }
 
 
 

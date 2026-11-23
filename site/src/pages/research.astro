@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import PageFigure from "../components/PageFigure.astro";
 import { FIELDS } from "../data/site";
 ---
 
@@ -7,7 +8,7 @@ import { FIELDS } from "../data/site";
   title="Research"
   description="What NeuroTitan Labs studies in machine learning, semiconductor design and quantum computing, the tools we use, and how results are checked."
 >
-  <section class="t-graphite page-hero">
+  <section class="t-graphite page-hero has-art">
     <div class="wrap page-head">
     <p class="label label--red">Research</p>
     <h1 class="display">What we study and how we check it.</h1>
@@ -19,6 +20,7 @@ import { FIELDS } from "../data/site";
       {FIELDS.map((f) => <a href={`#${f.id}`}>{f.index} {f.name}</a>)}
     </nav>
     </div>
+    <PageFigure shapes="0,1,2" />
   </section>
 
   {
@@ -55,10 +57,6 @@ import { FIELDS } from "../data/site";
 </Base>
 
 <style>
-  .page-hero {
-    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-    background-size: 22px 22px;
-  }
 
 
 

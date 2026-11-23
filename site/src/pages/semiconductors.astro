@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import PageFigure from "../components/PageFigure.astro";
 import ModelEmbed from "../components/ModelEmbed.astro";
 import { FIELDS } from "../data/site";
 
@@ -45,7 +46,7 @@ const journey = [
   title="Semiconductors"
   description="What semiconductors are, how chips are made, and how NeuroTitan Labs designs circuits on the open SkyWater 130 nm process with open-source tools."
 >
-  <section class="hero t-graphite">
+  <section class="hero page-hero has-art t-graphite">
     <div class="wrap page-head">
       <p class="label label--red">Semiconductors · NeuroTitan Labs</p>
       <h1 class="display">From transistor to layout, in the open.</h1>
@@ -54,6 +55,7 @@ const journey = [
         <a href="#basics">Basics</a><a href="#flow">Our flow</a><a href="#models">3D models</a><a href="#journey">How chips are made</a><a href="#topics">Topics</a>
       </nav>
     </div>
+    <PageFigure shapes="1" />
   </section>
 
   <section class="section dots" id="basics">
@@ -187,10 +189,6 @@ const journey = [
 </Base>
 
 <style>
-  .hero {
-    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-    background-size: 22px 22px;
-  }
 
   .page-head h1 {
     max-width: 16ch;

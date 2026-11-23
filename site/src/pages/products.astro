@@ -1,5 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
+import PageFigure from "../components/PageFigure.astro";
 import { PRODUCTS, SITE } from "../data/site";
 
 const legend = [
@@ -13,7 +14,7 @@ const legend = [
   title="Products"
   description="What NeuroTitan Labs is building, from the ECHO memory-assistant glasses to open-source quantum benchmarks, each labelled with where it really stands."
 >
-  <section class="hero t-graphite">
+  <section class="hero page-hero has-art t-graphite">
     <div class="wrap page-head">
       <p class="label label--red">Products</p>
       <h1 class="display">What we are building.</h1>
@@ -32,6 +33,7 @@ const legend = [
         }
       </ul>
     </div>
+    <PageFigure shapes="0,1,2" />
   </section>
 
   <section class="section dots">
@@ -76,10 +78,6 @@ const legend = [
 </Base>
 
 <style>
-  .hero {
-    background-image: radial-gradient(var(--dot) 1px, transparent 1.2px);
-    background-size: 22px 22px;
-  }
 
   .legend {
     list-style: none;
