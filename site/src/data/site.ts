@@ -129,6 +129,18 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
+    name: "langtax",
+    status: "Open source",
+    kind: "live",
+    summary:
+      "A command-line tool that measures the language tax in your own prompts: tokens per language on the tokenizers your models use, and how many English would not need. Runs on your machine; nothing is uploaded.",
+    points: ["jsonl, csv or text in", "GPT-4o, GPT-4 and open-model tokenizers", "Counts match the Index exactly"],
+    links: [
+      { label: "Code", href: "https://github.com/NeuroTitan-Hub/langtax" },
+      { label: "How to use it", href: "/cost#paste" },
+    ],
+  },
+  {
     name: "ECHO",
     status: "In development",
     kind: "dev",
