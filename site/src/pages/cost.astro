@@ -18,11 +18,25 @@ const hindi = by("hin_Deva");
 const over2 = (i: number) => langs.filter((l) => l.c !== "eng_Latn" && l.r[i][0] >= 2).length;
 const total = langs.length - 1;
 
+// "How to cut it": computed from the data, never typed.
+const ti = (id: string) => toks.findIndex((t) => t.id === id);
+const r = (code: string, id: string) => by(code).r[ti(id)][0];
+const cut = (from: number, to: number) => Math.round((1 - to / from) * 100);
+const tamil = by("tam_Taml");
+const amharic = by("amh_Ethi");
+const thai = by("tha_Thai");
+const bestOf = (l: Lang, ids: string[]) => ids.reduce((a, b) => (l.r[ti(b)][0] < l.r[ti(a)][0] ? b : a));
+const modern = ["o200k", "qwen3", "deepseek-v3", "mistral-nemo"];
+const label = (id: string) => toks[ti(id)].label;
+const sysEn = 1000;
+const sysHi = Math.round(sysEn * r("hin_Deva", "qwen3"));
+
 ---
 
 <Base
   title="yaptax: the Language Cost Index"
   description="How many more tokens the same meaning costs outside English: 204 languages on 8 tokenizers, measured on the same 1,012 sentences. Free, open data."
+  image="/og-cost.png"
 >
   <section class="hero page-hero t-graphite">
     <div class="wrap page-head">
@@ -209,10 +223,54 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
     </div>
   </section>
 
+  <section class="section t-concrete" id="cut">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="label">04 · How to cut it</p>
+        <h2>Same meaning, fewer tokens.</h2>
+      </div>
+      <div class="cuts">
+        <article class="card cut" data-reveal>
+          <p class="cut-num">{cut(r("hin_Deva", "qwen3"), r("hin_Deva", "o200k"))}% fewer</p>
+          <h3>Pick the tokenizer that suits the language.</h3>
+          <p>
+            Hindi on Qwen3's tokenizer needs {fmt(r("hin_Deva", "qwen3"))}× English's tokens; on GPT-4o's,{" "}
+            {fmt(r("hin_Deva", "o200k"))}×. Tamil: {fmt(tamil.r[ti("qwen3")][0])}× against {fmt(tamil.r[ti("o200k")][0])}×,{" "}
+            {cut(tamil.r[ti("qwen3")][0], tamil.r[ti("o200k")][0])}% fewer.
+          </p>
+        </article>
+        <article class="card cut" data-reveal>
+          <p class="cut-num">No single winner</p>
+          <h3>Route each language to its best model.</h3>
+          <p>
+            Of the four current tokenizers here, {label(bestOf(amharic, modern))} is the most efficient for Amharic{" "}
+            ({fmt(amharic.r[ti(bestOf(amharic, modern))][0])}× against GPT-4o's {fmt(amharic.r[ti("o200k")][0])}×), and{" "}
+            {label(bestOf(thai, modern))} for Thai ({fmt(thai.r[ti(bestOf(thai, modern))][0])}× against{" "}
+            {fmt(thai.r[ti("o200k")][0])}×). One model for every language leaves savings behind.
+          </p>
+        </article>
+        <article class="card cut" data-reveal>
+          <p class="cut-num">{(sysHi - sysEn).toLocaleString("en-US")} fewer</p>
+          <h3>Keep the fixed instructions in English.</h3>
+          <p>
+            A bot's instructions go out with every request. {sysEn.toLocaleString("en-US")} tokens of English
+            instructions are about {sysHi.toLocaleString("en-US")} if written in Hindi on Qwen3. The bot can still answer
+            in Hindi; check that its answers stay as good.
+          </p>
+        </article>
+      </div>
+      <p class="note muted">
+        Fewer tokens is not the same as cheaper or better: prices per token differ, and so does answer quality in each
+        language. The yaptax Audit measures all three on your own traffic and ranks the fixes.{" "}
+        <a href={`mailto:${SITE.email}?subject=yaptax%20Audit`}>Ask for one</a>.
+      </p>
+    </div>
+  </section>
+
   <section class="section" id="method">
     <div class="wrap method">
       <div>
-        <p class="label">04 · How we measured</p>
+        <p class="label">05 · How we measured</p>
         <h2>One text, 204 languages.</h2>
       </div>
       <div class="prose">
@@ -529,6 +587,34 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
     margin-top: 1.5rem;
   }
 
+  .cuts {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+  }
+
+  .cut {
+    display: grid;
+    align-content: start;
+    gap: 0.75rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .cut p,
+  .cut h3 {
+    margin: 0;
+  }
+
+  .cut h3 {
+    font-size: 1.3rem;
+  }
+
+  .cut-num {
+    font-family: var(--mono);
+    font-size: clamp(1.4rem, 2.6vw, 1.9rem);
+    color: var(--red);
+  }
+
   .method {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
@@ -553,6 +639,7 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
     .facts,
     .tool,
     .cli,
+    .cuts,
     .method {
       grid-template-columns: 1fr;
     }
