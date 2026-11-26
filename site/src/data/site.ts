@@ -16,7 +16,7 @@ export const SITE = {
 } as const;
 
 export const NAV = [
-  { href: "/cost", label: "Cost Index" },
+  { href: "/cost", label: "yaptax" },
   { href: "/ai", label: "NeuroTitan AI" },
   { href: "/semiconductors", label: "Semiconductors" },
   { href: "/research", label: "Research" },
@@ -117,11 +117,11 @@ export type Product = {
 /** Only things that exist. Status words are deliberate: see the office audit, finding F1. */
 export const PRODUCTS: Product[] = [
   {
-    name: "Language Cost Index",
+    name: "yaptax Index",
     status: "Free",
     kind: "live",
     summary:
-      "How many more tokens the same meaning costs outside English, for 204 languages on 8 tokenizers. Tokens are what AI models charge for and what make them slow. Paste your own text to count it in your browser.",
+      "The free Language Cost Index: how many more tokens the same meaning costs outside English, for 204 languages on 8 tokenizers. Tokens are what AI models charge for and what make them slow. Paste your own text to count it in your browser.",
     points: ["204 languages, 8 tokenizers, 95% intervals", "Calculator for your monthly spend", "Open data: JSON and CSV"],
     links: [
       { label: "Open the Index", href: "/cost" },
@@ -129,14 +129,14 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
-    name: "langtax",
+    name: "yaptax CLI",
     status: "Open source",
     kind: "live",
     summary:
       "A command-line tool that measures the language tax in your own prompts: tokens per language on the tokenizers your models use, and how many English would not need. Runs on your machine; nothing is uploaded.",
     points: ["jsonl, csv or text in", "GPT-4o, GPT-4 and open-model tokenizers", "Counts match the Index exactly"],
     links: [
-      { label: "Code", href: "https://github.com/NeuroTitan-Hub/langtax" },
+      { label: "Code", href: "https://github.com/NeuroTitan-Hub/yaptax" },
       { label: "How to use it", href: "/cost#paste" },
     ],
   },

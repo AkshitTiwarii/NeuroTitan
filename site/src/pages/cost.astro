@@ -21,12 +21,12 @@ const total = langs.length - 1;
 ---
 
 <Base
-  title="Language Cost Index"
+  title="yaptax: the Language Cost Index"
   description="How many more tokens the same meaning costs outside English: 204 languages on 8 tokenizers, measured on the same 1,012 sentences. Free, open data."
 >
   <section class="hero page-hero t-graphite">
     <div class="wrap page-head">
-      <p class="label label--red">Language Cost Index · v0 · free</p>
+      <p class="label label--red">yaptax Index · v0 · free</p>
       <h1 class="display">What does your language cost?</h1>
       <p class="lede">
         AI models charge by the token, and they slow down with every token. The same meaning takes more tokens outside
@@ -132,13 +132,13 @@ const total = langs.length - 1;
         <div>
           <p class="label">A whole file of prompts?</p>
           <p>
-            <strong>langtax</strong> counts them per language on your own machine and tells you how many tokens are
+            <strong>yaptax</strong> counts them per language on your own machine and tells you how many tokens are
             language tax. Open source, MIT. Nothing is uploaded.
           </p>
         </div>
-        <pre><code>pip install git+https://github.com/NeuroTitan-Hub/langtax
-langtax measure prompts.jsonl --spend 2000</code></pre>
-        <p><a class="button button--ghost" href="https://github.com/NeuroTitan-Hub/langtax" rel="noopener">langtax on GitHub →</a></p>
+        <pre><code>pip install git+https://github.com/NeuroTitan-Hub/yaptax
+yaptax measure prompts.jsonl --spend 2000</code></pre>
+        <p><a class="button button--ghost" href="https://github.com/NeuroTitan-Hub/yaptax" rel="noopener">yaptax on GitHub →</a></p>
       </div>
     </div>
   </section>
@@ -232,7 +232,7 @@ langtax measure prompts.jsonl --spend 2000</code></pre>
           rebuilt from that post's published data by one script.
         </p>
         <p>
-          <strong>Want this measured on your own traffic?</strong> We run a Language Cost Audit: your real prompts, per
+          <strong>Want this measured on your own traffic?</strong> We run a yaptax Audit: your real prompts, per
           language, on your model and the alternatives, with fixes measured before and after. Write to
           <a href={`mailto:${SITE.email}?subject=Language%20Cost%20Audit`}>{SITE.email}</a>.
         </p>
