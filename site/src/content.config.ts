@@ -17,7 +17,7 @@ const blog = defineCollection({
     date: z.coerce.date(),
     updated: z.coerce.date().optional(),
     authors: z.array(z.string()).min(1),
-    repo: z.string().url().nullable(),
+    repo: z.url().nullable(),
     image: z.string().optional(),
     draft: z.boolean().default(false),
   }),
