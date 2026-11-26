@@ -16,6 +16,7 @@ export const SITE = {
 } as const;
 
 export const NAV = [
+  { href: "/cost", label: "Cost Index" },
   { href: "/ai", label: "NeuroTitan AI" },
   { href: "/semiconductors", label: "Semiconductors" },
   { href: "/research", label: "Research" },
@@ -106,7 +107,7 @@ export const AI_DOMAINS = [
 
 export type Product = {
   name: string;
-  status: "In development" | "Open source" | "Concept" | "In research";
+  status: "In development" | "Open source" | "Free" | "Concept" | "In research";
   kind: "live" | "dev" | "idle";
   summary: string;
   points: string[];
@@ -115,6 +116,18 @@ export type Product = {
 
 /** Only things that exist. Status words are deliberate: see the office audit, finding F1. */
 export const PRODUCTS: Product[] = [
+  {
+    name: "Language Cost Index",
+    status: "Free",
+    kind: "live",
+    summary:
+      "How many more tokens the same meaning costs outside English, for 204 languages on 8 tokenizers. Tokens are what AI models charge for and what make them slow. Paste your own text to count it in your browser.",
+    points: ["204 languages, 8 tokenizers, 95% intervals", "Calculator for your monthly spend", "Open data: JSON and CSV"],
+    links: [
+      { label: "Open the Index", href: "/cost" },
+      { label: "Method", href: "/blog/sentence-cost-in-electrons" },
+    ],
+  },
   {
     name: "ECHO",
     status: "In development",

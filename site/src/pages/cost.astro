@@ -1,0 +1,522 @@
+---
+import Base from "../layouts/Base.astro";
+import { SITE } from "../data/site";
+import index from "../data/language-index.json";
+
+type Lang = (typeof index.languages)[number];
+
+const toks = index.tokenizers;
+const langs = index.languages as Lang[];
+const fmt = (x: number) => x.toFixed(2);
+const heat = (x: number) => (x >= 4 ? "h4" : x >= 2 ? "h2" : x >= 1.5 ? "h1" : "h0");
+
+// Headline numbers, read from the data so the copy can never drift from it.
+const by = (code: string) => langs.find((l) => l.c === code)!;
+const o = toks.findIndex((t) => t.id === "o200k");
+const q = toks.findIndex((t) => t.id === "qwen3");
+const hindi = by("hin_Deva");
+const over2 = (i: number) => langs.filter((l) => l.c !== "eng_Latn" && l.r[i][0] >= 2).length;
+const total = langs.length - 1;
+
+---
+
+<Base
+  title="Language Cost Index"
+  description="How many more tokens the same meaning costs outside English: 204 languages on 8 tokenizers, measured on the same 1,012 sentences. Free, open data."
+>
+  <section class="hero page-hero t-graphite">
+    <div class="wrap page-head">
+      <p class="label label--red">Language Cost Index · v0 · free</p>
+      <h1 class="display">What does your language cost?</h1>
+      <p class="lede">
+        AI models charge by the token, and they slow down with every token. The same meaning takes more tokens outside
+        English. Here is how many more, for {langs.length} languages on {toks.length} tokenizers, measured on the same
+        1,012 sentences in every language.
+      </p>
+      <ul class="facts">
+        <li>
+          <strong>{fmt(hindi.r[o][0])}× to {fmt(hindi.r[q][0])}×</strong>
+          <span>Hindi's tokens against English, from GPT-4o's tokenizer to Qwen3's</span>
+        </li>
+        <li>
+          <strong>{over2(o)} of {total}</strong>
+          <span>languages need at least twice English's tokens on GPT-4o's tokenizer</span>
+        </li>
+        <li>
+          <strong>{over2(q)} of {total}</strong>
+          <span>on Qwen3's, a popular open model</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <section class="section dots" id="check">
+    <div class="wrap">
+      <div class="section-head">
+        <p class="label">01 · Your language tax</p>
+        <h2>Pick a language and a model.</h2>
+      </div>
+
+      <div class="tool card" data-cost-tool>
+        <div class="controls">
+          <label>
+            <span class="label">Language</span>
+            <select data-lang>
+              {
+                langs
+                  .filter((l) => l.c !== "eng_Latn")
+                  .map((l) => (
+                    <option value={l.c} selected={l.c === "hin_Deva"}>
+                      {l.n}
+                    </option>
+                  ))
+              }
+            </select>
+          </label>
+          <label>
+            <span class="label">Tokenizer (model)</span>
+            <select data-tok>
+              {toks.map((t, i) => <option value={i}>{t.label}: {t.models}</option>)}
+            </select>
+          </label>
+          <label>
+            <span class="label">Monthly AI spend on this language (USD)</span>
+            <input data-spend type="number" min="0" step="100" value="1000" inputmode="numeric" />
+          </label>
+        </div>
+
+        <div class="result" aria-live="polite">
+          <p class="big"><span data-out-ratio>–</span><small>× English's tokens</small></p>
+          <p data-out-text class="muted">Loading…</p>
+          <p data-out-best class="muted"></p>
+        </div>
+
+        <div class="bars" data-bars aria-label="Token ratio to English on each tokenizer"></div>
+      </div>
+      <p class="note muted">
+        The tax is the share of spend that English would not need: 1 − 1/ratio. It assumes you pay per token at the
+        same price, which is how API pricing works. Bars show the 95% interval as a thin line where it is wide enough to
+        see.
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="paste">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <div>
+          <p class="label">02 · Your own text</p>
+          <h2>Paste a real prompt.</h2>
+        </div>
+        <p class="lede">
+          We count its tokens on OpenAI's two current tokenizers, in your browser. Your text is not sent anywhere.
+        </p>
+      </div>
+
+      <div class="paste card" data-paste>
+        <textarea data-text rows="6" placeholder="Paste text in any language…"></textarea>
+        <div class="paste-row">
+          <button class="button" type="button" data-count>Count tokens</button>
+          <span class="muted" data-paste-status>The tokenizers load when you press the button (about 1.6 MB, once).</span>
+        </div>
+        <table class="mini" data-paste-out hidden>
+          <thead>
+            <tr><th>Tokenizer</th><th>Tokens</th><th>Same meaning in English, about</th><th>Extra tokens</th></tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <p class="note muted" data-paste-note hidden></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section t-concrete" id="index">
+    <div class="wrap">
+      <div class="section-head section-head--split">
+        <div>
+          <p class="label">03 · The full index</p>
+          <h2>All {langs.length} languages.</h2>
+        </div>
+        <div class="filters">
+          <input data-filter type="search" placeholder="Filter by language or code" aria-label="Filter languages" />
+          <p class="muted small">
+            Token ratio to English. Click a column to sort. Hover a number for its 95% interval.
+          </p>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table class="index" data-index>
+          <thead>
+            <tr>
+              <th data-sort="n" scope="col">Language</th>
+              {
+                toks.map((t, i) => (
+                  <th data-sort={`r${i}`} scope="col" class="num" title={t.models}>
+                    {t.label}
+                  </th>
+                ))
+              }
+              <th data-sort="es" scope="col" class="num" title={index.energy.es}>Server energy<sup>d</sup></th>
+              <th data-sort="eg" scope="col" class="num" title={index.energy.eg}>GPU energy<sup>m</sup></th>
+            </tr>
+          </thead>
+          <tbody>
+            {
+              langs.map((l) => (
+                <tr data-c={l.c} data-n={l.n.toLowerCase()}>
+                  <th scope="row">
+                    {l.n} <span class="code">{l.c}</span>
+                  </th>
+                  {l.r.map((x) => (
+                    <td class={`num ${heat(x[0])}`} data-v={x[0]} title={`95% interval ${fmt(x[1])} to ${fmt(x[2])}`}>
+                      {fmt(x[0])}
+                    </td>
+                  ))}
+                  <td class="num" data-v={l.es ? l.es[0] : ""} title={l.es ? `range ${fmt(l.es[1])} to ${fmt(l.es[2])}` : ""}>
+                    {l.es ? fmt(l.es[0]) : "–"}
+                  </td>
+                  <td class="num" data-v={l.eg ?? ""}>
+                    {l.eg ? fmt(l.eg) : "–"}
+                  </td>
+                </tr>
+              ))
+            }
+          </tbody>
+        </table>
+      </div>
+      <p class="note muted">
+        <sup>d</sup> {index.energy.es}. <sup>m</sup> {index.energy.eg}. Shading: 1.5× or more, 2× or more, 4× or more.
+      </p>
+      <p class="links">
+        <a class="button button--ghost" href="/cost/index-v0.json" download>Download JSON →</a>
+        <a class="button button--ghost" href="/cost/index-v0.csv" download>Download CSV →</a>
+        <a class="button button--ghost" href={index.source} rel="noopener">Code and raw data →</a>
+      </p>
+    </div>
+  </section>
+
+  <section class="section" id="method">
+    <div class="wrap method">
+      <div>
+        <p class="label">04 · How we measured</p>
+        <h2>One text, 204 languages.</h2>
+      </div>
+      <div class="prose">
+        <p>
+          FLORES-200 is the same 1,012 sentences, professionally translated into 204 languages. We ran every
+          language through each tokenizer and divided its token count by English's. A ratio of 2 means the same meaning
+          costs twice the tokens. The 95% intervals come from resampling the sentences 2,000 times.
+        </p>
+        <p>
+          Tokenizers from Anthropic and Google are not in v0, because they are not published as files. They are next on
+          our list. So are a dated price table, so the Index can show cost in dollars per model, and more open
+          tokenizers.
+        </p>
+        <p>
+          The method, the checks and what is wrong with it are in our first post,
+          <a href="/blog/sentence-cost-in-electrons">What does a sentence cost in electrons?</a> Every number here is
+          rebuilt from that post's published data by one script.
+        </p>
+        <p>
+          <strong>Want this measured on your own traffic?</strong> We run a Language Cost Audit: your real prompts, per
+          language, on your model and the alternatives, with fixes measured before and after. Write to
+          <a href={`mailto:${SITE.email}?subject=Language%20Cost%20Audit`}>{SITE.email}</a>.
+        </p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<script>
+  import "../scripts/cost-index";
+</script>
+
+<style>
+  .facts {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1.5rem;
+    max-width: 60rem;
+  }
+
+  .facts li {
+    display: grid;
+    gap: 0.35rem;
+    border-top: 1px solid var(--rule);
+    padding-top: 0.9rem;
+  }
+
+  .facts strong {
+    font-family: var(--mono);
+    font-size: clamp(1.5rem, 3vw, 2.1rem);
+    font-weight: 500;
+    color: var(--red);
+  }
+
+  .facts span {
+    color: var(--ink-2);
+    font-size: 0.9375rem;
+  }
+
+  .tool {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 2rem 2.5rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .controls {
+    display: grid;
+    gap: 1.1rem;
+    align-content: start;
+  }
+
+  .controls label {
+    display: grid;
+    gap: 0.4rem;
+  }
+
+  select,
+  input,
+  textarea {
+    font: inherit;
+    color: var(--ink);
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    padding: 0.6rem 0.75rem;
+    width: 100%;
+  }
+
+  select:focus-visible,
+  input:focus-visible,
+  textarea:focus-visible {
+    outline: 2px solid var(--red);
+    outline-offset: 1px;
+  }
+
+  .result {
+    display: grid;
+    gap: 0.6rem;
+    align-content: start;
+  }
+
+  .big {
+    margin: 0;
+    font-family: var(--mono);
+    font-size: clamp(3rem, 7vw, 4.75rem);
+    line-height: 1;
+    color: var(--red);
+  }
+
+  .big small {
+    display: inline-block;
+    font-size: 1rem;
+    color: var(--ink-2);
+    margin-left: 0.5rem;
+  }
+
+  .bars {
+    grid-column: 1 / -1;
+    display: grid;
+    gap: 0.45rem;
+  }
+
+  .bars :global(.bar) {
+    display: grid;
+    grid-template-columns: 11rem minmax(0, 1fr) 4.5rem;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.875rem;
+  }
+
+  .bars :global(.bar.is-on) {
+    font-weight: 600;
+  }
+
+  .bars :global(.track) {
+    position: relative;
+    height: 0.8rem;
+    background: var(--paper-2);
+    border-radius: 0.2rem;
+  }
+
+  .bars :global(.fill) {
+    position: absolute;
+    inset: 0 auto 0 0;
+    background: var(--ink-2);
+    border-radius: 0.2rem;
+  }
+
+  .bars :global(.bar.is-on .fill) {
+    background: var(--red);
+  }
+
+  .bars :global(.ci) {
+    position: absolute;
+    top: 50%;
+    height: 2px;
+    background: var(--ink);
+  }
+
+  .bars :global(.one) {
+    position: absolute;
+    top: -0.2rem;
+    bottom: -0.2rem;
+    width: 1px;
+    background: var(--ink);
+  }
+
+  .bars :global(.v) {
+    font-family: var(--mono);
+    text-align: right;
+  }
+
+  .note {
+    font-size: 0.875rem;
+    max-width: 52rem;
+    margin-top: 1rem;
+  }
+
+  .paste {
+    display: grid;
+    gap: 1rem;
+    padding: clamp(1.25rem, 3vw, 2.25rem);
+  }
+
+  .paste-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.875rem;
+  }
+
+  th,
+  td {
+    text-align: left;
+    padding: 0.45rem 0.6rem;
+    border-bottom: 1px solid var(--rule);
+  }
+
+  .num {
+    text-align: right;
+    font-family: var(--mono);
+    white-space: nowrap;
+  }
+
+  .mini td:not(:first-child),
+  .mini th:not(:first-child) {
+    text-align: right;
+    font-family: var(--mono);
+  }
+
+  .filters {
+    display: grid;
+    gap: 0.5rem;
+  }
+
+  .small {
+    font-size: 0.875rem;
+    margin: 0;
+  }
+
+  .table-wrap {
+    overflow: auto;
+    max-height: 75vh;
+    border: 1px solid var(--rule);
+    border-radius: 0.5rem;
+    background: var(--paper);
+  }
+
+  .index thead th {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--paper-2);
+    cursor: pointer;
+    user-select: none;
+    white-space: nowrap;
+    font-weight: 600;
+  }
+
+  .index thead th[aria-sort="ascending"]::after {
+    content: " ↑";
+  }
+
+  .index thead th[aria-sort="descending"]::after {
+    content: " ↓";
+  }
+
+  .index tbody th {
+    font-weight: 500;
+    white-space: nowrap;
+  }
+
+  .code {
+    font-family: var(--mono);
+    font-size: 0.75rem;
+    color: var(--grey);
+    margin-left: 0.35rem;
+  }
+
+  .h1 {
+    background: color-mix(in srgb, var(--red) 10%, transparent);
+  }
+
+  .h2 {
+    background: color-mix(in srgb, var(--red) 22%, transparent);
+  }
+
+  .h4 {
+    background: color-mix(in srgb, var(--red) 40%, transparent);
+  }
+
+  .links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    margin-top: 1.5rem;
+  }
+
+  .method {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
+    gap: 2rem 4rem;
+  }
+
+  .method h2 {
+    font-size: clamp(2rem, 4vw, 3.25rem);
+  }
+
+  .prose {
+    display: grid;
+    gap: 1rem;
+    max-width: var(--measure);
+  }
+
+  .prose p {
+    margin: 0;
+  }
+
+  @media (max-width: 56rem) {
+    .facts,
+    .tool,
+    .method {
+      grid-template-columns: 1fr;
+    }
+
+    .bars :global(.bar) {
+      grid-template-columns: 7.5rem minmax(0, 1fr) 3.75rem;
+    }
+  }
+</style>
