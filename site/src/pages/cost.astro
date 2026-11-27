@@ -264,6 +264,23 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
         language. The yaptax Audit measures all three on your own traffic and ranks the fixes.{" "}
         <a href={`mailto:${SITE.email}?subject=yaptax%20Audit`}>Ask for one</a>.
       </p>
+      <div class="router card">
+        <div>
+          <p class="label">Do it automatically</p>
+          <p>
+            <strong>yaptax Router</strong> sits between your app and your models. For each request it picks the cheapest
+            model you allow for that language, falls back if one is down, and shows the saving on a live dashboard. Open
+            source; your keys stay with you.
+          </p>
+        </div>
+        <pre><code>pip install "yaptax[router]"
+yaptax demo --open</code></pre>
+        <p><a class="button button--ghost" href="https://github.com/NeuroTitan-Hub/yaptax#yaptax-router-cut-the-tax-automatically" rel="noopener">Router docs →</a></p>
+      </div>
+      <p class="note muted">
+        The demo runs on a built-in fake provider where every model has the same price, so its savings come only from
+        tokens. Version 0 has not yet run on real traffic.
+      </p>
     </div>
   </section>
 
@@ -609,6 +626,34 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
     font-size: 1.3rem;
   }
 
+  .router {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr) auto;
+    align-items: center;
+    gap: 1rem 2rem;
+    margin-top: 2rem;
+    padding: clamp(1.25rem, 3vw, 2rem);
+  }
+
+  .router p {
+    margin: 0;
+  }
+
+  .router .label {
+    margin-bottom: 0.4rem;
+  }
+
+  .router pre {
+    margin: 0;
+    overflow-x: auto;
+    padding: 0.85rem 1rem;
+    border-radius: 0.5rem;
+    background: var(--paper-2);
+    font-family: var(--mono);
+    font-size: 0.8125rem;
+    line-height: 1.6;
+  }
+
   .cut-num {
     font-family: var(--mono);
     font-size: clamp(1.4rem, 2.6vw, 1.9rem);
@@ -640,6 +685,7 @@ yaptax measure prompts.jsonl --spend 2000</code></pre>
     .tool,
     .cli,
     .cuts,
+    .router,
     .method {
       grid-template-columns: 1fr;
     }

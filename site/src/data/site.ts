@@ -141,6 +141,18 @@ export const PRODUCTS: Product[] = [
     ],
   },
   {
+    name: "yaptax Router",
+    status: "Open source",
+    kind: "live",
+    summary:
+      "Cuts the language tax automatically. A drop-in, OpenAI-compatible endpoint that sends each request to the cheapest model you allow for its language, and shows what that saved on a live dashboard. Teams use their own keys. Version 0: tested on a built-in demo provider, not yet on real traffic.",
+    points: ["One-line change: point your OpenAI client at it", "Per-language rules, fallback, streaming", "Try it free: yaptax demo"],
+    links: [
+      { label: "Code and docs", href: "https://github.com/NeuroTitan-Hub/yaptax#yaptax-router-cut-the-tax-automatically" },
+      { label: "How it saves", href: "/cost#cut" },
+    ],
+  },
+  {
     name: "ECHO",
     status: "In development",
     kind: "dev",
